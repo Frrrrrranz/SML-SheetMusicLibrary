@@ -38,15 +38,12 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleUpdateComposer = async (updatedComposer: Composer) => {
-    try {
-      const updated = await api.updateComposer(updatedComposer.id, updatedComposer);
-      setComposers((prev) =>
-        prev.map(c => c.id === updated.id ? updated : c)
-      );
-    } catch (error) {
-      console.error('Failed to update composer:', error);
-    }
+  // NOTE: 这个函数只更新本地状态，不调用 API
+  // 实际的数据库操作（如添加/删除作品）已经在 ComposerDetailScreen 中完成
+  const handleUpdateComposer = (updatedComposer: Composer) => {
+    setComposers((prev) =>
+      prev.map(c => c.id === updatedComposer.id ? updatedComposer : c)
+    );
   };
 
   const handleDeleteComposer = async (id: string) => {

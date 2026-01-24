@@ -23,8 +23,9 @@ export interface Composer {
   name: string;
   period: string;
   image: string;
-  sheetMusicCount: number;
-  recordingCount: number;
+  // NOTE: 这两个字段不存储在数据库中，应动态计算
+  sheetMusicCount?: number;
+  recordingCount?: number;
   works: Work[];
   recordings: Recording[];
 }

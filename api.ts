@@ -13,7 +13,12 @@ export const api = {
             .order('name');
 
         if (error) throw error;
-        return data || [];
+        // NOTE: 列表页面不需要关联数据，初始化空数组避免 undefined 问题
+        return (data || []).map(composer => ({
+            ...composer,
+            works: [],
+            recordings: []
+        }));
     },
 
     getComposer: async (id: string): Promise<Composer> => {
@@ -42,10 +47,13 @@ export const api = {
 
         if (recordingsError) throw recordingsError;
 
-        // 组装数据
+        // 组装数据，并将 file_url 转换为 fileUrl
         return {
             ...composer,
-            works: works || [],
+            works: (works || []).map((w: any) => ({
+                ...w,
+                fileUrl: w.file_url  // NOTE: 数据库使用 snake_case，前端使用 camelCase
+            })),
             recordings: recordings || []
         };
     },
@@ -106,7 +114,8 @@ export const api = {
             .single();
 
         if (error) throw error;
-        return data;
+        // NOTE: 转换 file_url 为 fileUrl 以匹配前端类型
+        return { ...data, fileUrl: data.file_url };
     },
 
     updateWork: async (id: string, work: any): Promise<Work> => {
@@ -124,7 +133,8 @@ export const api = {
             .single();
 
         if (error) throw error;
-        return data;
+        // NOTE: 转换 file_url 为 fileUrl 以匹配前端类型
+        return { ...data, fileUrl: data.file_url };
     },
 
     deleteWork: async (id: string): Promise<void> => {

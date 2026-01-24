@@ -74,7 +74,7 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
                   {composer.name}
                 </p>
                 <p className="text-textSub text-[13px] font-medium mt-1 font-sans tracking-wide">
-                  {composer.sheetMusicCount} Sheet Music · {composer.recordingCount} Recordings
+                  {composer.sheetMusicCount || 0} Sheet Music · {composer.recordingCount || 0} Recordings
                 </p>
               </div>
 

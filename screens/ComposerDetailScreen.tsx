@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, MoreHorizontal, Plus, Camera, FileText, Music, Check, Trash2, Edit2, Disc, PlayCircle, AlertCircle, Upload, Download, Loader2 } from 'lucide-react';
+import { ChevronLeft, Plus, Camera, FileText, Music, Check, Trash2, Edit2, PlayCircle, AlertCircle, Upload, Loader2 } from 'lucide-react';
 import { ViewMode, Composer, Work, Recording } from '../types';
 import { Modal } from '../components/Modal';
 import { api } from '../api';
@@ -74,7 +74,12 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   const handleUpdateInfo = async (field: 'name' | 'period', value: string) => {
     try {
       const updatedComposer = await api.updateComposer(composer.id, { [field]: value });
-      onUpdateComposer(updatedComposer);
+      // NOTE: API 返回的 updatedComposer 不包含 works/recordings，需要保留现有数据
+      onUpdateComposer({
+        ...updatedComposer,
+        works: composer.works || [],
+        recordings: composer.recordings || []
+      });
     } catch (error) {
       console.error('Failed to update info:', error);
     }
@@ -98,8 +103,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
         const updatedWorks = composer.works.filter(w => w.id !== workId);
         onUpdateComposer({
           ...composer,
-          works: updatedWorks,
-          sheetMusicCount: updatedWorks.length
+          works: updatedWorks
         });
       } catch (error) {
         console.error('Failed to delete work:', error);
@@ -171,8 +175,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
         const updatedWorks = [newWork, ...(composer.works || [])];
         onUpdateComposer({
           ...composer,
-          works: updatedWorks,
-          sheetMusicCount: updatedWorks.length
+          works: updatedWorks
         });
       }
 
@@ -200,8 +203,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
         const updatedRecordings = composer.recordings.filter(r => r.id !== recId);
         onUpdateComposer({
           ...composer,
-          recordings: updatedRecordings,
-          recordingCount: updatedRecordings.length
+          recordings: updatedRecordings
         });
       } catch (error) {
         console.error('Failed to delete recording:', error);
@@ -259,8 +261,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
         const updatedRecordings = [newRec, ...(composer.recordings || [])];
         onUpdateComposer({
           ...composer,
-          recordings: updatedRecordings,
-          recordingCount: updatedRecordings.length
+          recordings: updatedRecordings
         });
       }
       setShowRecordingModal(false);
@@ -371,7 +372,14 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
             {composer.works && composer.works.map((work) => (
               <div
                 key={work.id}
-                className="group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors cursor-pointer border-b border-divider last:border-0 relative overflow-hidden"
+                onClick={() => {
+                  // NOTE: 非编辑模式下，点击条目打开 PDF 查看
+                  if (!isEditing && work.fileUrl) {
+                    window.open(work.fileUrl, '_blank');
+                  }
+                }}
+                className={`group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors border-b border-divider last:border-0 relative overflow-hidden ${!isEditing && work.fileUrl ? 'cursor-pointer' : ''
+                  }`}
               >
                 {isEditing ? (
                   <button
@@ -395,32 +403,17 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
                   </p>
                 </div>
 
-                <div className="shrink-0 flex items-center gap-2">
-                  {/* 如果有 PDF 文件，显示查看按钮 */}
-                  {work.fileUrl && !isEditing && (
-                    <a
-                      href={work.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex size-8 items-center justify-center rounded-full text-oldGold hover:bg-oldGold/10 transition-colors"
-                    >
-                      <Download size={18} />
-                    </a>
-                  )}
-                  {isEditing ? (
+                {/* 只有编辑模式下显示编辑按钮 */}
+                {isEditing && (
+                  <div className="shrink-0">
                     <button
                       onClick={(e) => openEditWorkModal(work, e)}
                       className="flex size-8 items-center justify-center rounded-full text-textSub hover:text-oldGold hover:bg-black/5 transition-colors"
                     >
                       <Edit2 size={16} />
                     </button>
-                  ) : (
-                    <button className="flex size-8 items-center justify-center rounded-full text-textSub hover:text-textMain hover:bg-black/5 transition-colors">
-                      <MoreHorizontal size={20} />
-                    </button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             ))}
             {(!composer.works || composer.works.length === 0) && (
