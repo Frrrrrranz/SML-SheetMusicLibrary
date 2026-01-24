@@ -11,8 +11,8 @@ class CamelModel(BaseModel):
         populate_by_name = True
 
 class Work(CamelModel):
-    id: str
-    composer_id: str
+    id: Optional[str] = None
+    composer_id: Optional[str] = None
     title: str
     edition: Optional[str] = None
     year: Optional[str] = None
@@ -20,8 +20,8 @@ class Work(CamelModel):
     created_at: Optional[str] = None
 
 class Recording(CamelModel):
-    id: str
-    composer_id: str
+    id: Optional[str] = None
+    composer_id: Optional[str] = None
     title: str
     performer: Optional[str] = None
     duration: Optional[str] = None

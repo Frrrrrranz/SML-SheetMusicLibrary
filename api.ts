@@ -1,111 +1,194 @@
-import { Composer } from './types';
+import { supabase } from './supabase';
+import { Composer, Work, Recording } from './types';
 
-const API_URL = 'http://localhost:8000/api';
+// 我们不再需要 backend/main.py 或 localhost:8000
+// 直接在前端使用 Supabase Client，这样 Vercel 部署就能直接工作
 
 export const api = {
+    // --- Composers (作曲家) ---
     getComposers: async (): Promise<Composer[]> => {
-        const response = await fetch(`${API_URL}/composers`);
-        if (!response.ok) throw new Error('Failed to fetch composers');
-        return response.json();
+        const { data, error } = await supabase
+            .from('composers')
+            .select('*')
+            .order('name');
+
+        if (error) throw error;
+        return data || [];
     },
 
     getComposer: async (id: string): Promise<Composer> => {
-        const response = await fetch(`${API_URL}/composers/${id}`);
-        if (!response.ok) throw new Error('Failed to fetch composer');
-        return response.json();
+        // 1. 获取作曲家基本信息
+        const { data: composer, error: composerError } = await supabase
+            .from('composers')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (composerError) throw composerError;
+
+        // 2. 获取关联的作品
+        const { data: works, error: worksError } = await supabase
+            .from('works')
+            .select('*')
+            .eq('composer_id', id);
+
+        if (worksError) throw worksError;
+
+        // 3. 获取关联的录音
+        const { data: recordings, error: recordingsError } = await supabase
+            .from('recordings')
+            .select('*')
+            .eq('composer_id', id);
+
+        if (recordingsError) throw recordingsError;
+
+        // 组装数据
+        return {
+            ...composer,
+            works: works || [],
+            recordings: recordings || []
+        };
     },
 
     createComposer: async (composer: { name: string; period: string; image: string }): Promise<Composer> => {
-        const response = await fetch(`${API_URL}/composers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(composer),
-        });
-        if (!response.ok) throw new Error('Failed to create composer');
-        return response.json();
+        // 移除 id，让数据库自动生成
+        const { data, error } = await supabase
+            .from('composers')
+            .insert([composer])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return { ...data, works: [], recordings: [] };
     },
 
     updateComposer: async (id: string, composer: Partial<Composer>): Promise<Composer> => {
-        const response = await fetch(`${API_URL}/composers/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(composer),
-        });
-        if (!response.ok) throw new Error('Failed to update composer');
-        return response.json();
+        // 更新时排除关联数组，只更新字段
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { works, recordings, ...updates } = composer;
+
+        const { data, error } = await supabase
+            .from('composers')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
     },
 
     deleteComposer: async (id: string): Promise<void> => {
-        const response = await fetch(`${API_URL}/composers/${id}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Failed to delete composer');
+        const { error } = await supabase
+            .from('composers')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
     },
 
-    // Works
-    createWork: async (work: any): Promise<any> => {
-        const response = await fetch(`${API_URL}/works`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(work),
-        });
-        if (!response.ok) throw new Error('Failed to create work');
-        return response.json();
+    // --- Works (作品/乐谱) ---
+    createWork: async (work: any): Promise<Work> => {
+        // 你的数据库字段是 composer_id, title, edition, year, file_url
+        // 前端传进来的 work 对象需要匹配这些字段
+        const payload = {
+            composer_id: work.composer_id,
+            title: work.title,
+            edition: work.edition,
+            year: work.year,
+            file_url: work.fileUrl || work.file_url // 兼容两种写法
+        };
+
+        const { data, error } = await supabase
+            .from('works')
+            .insert([payload])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
     },
 
-    updateWork: async (id: string, work: any): Promise<any> => {
-        const response = await fetch(`${API_URL}/works/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(work),
-        });
-        if (!response.ok) throw new Error('Failed to update work');
-        return response.json();
+    updateWork: async (id: string, work: any): Promise<Work> => {
+        const payload: any = {};
+        if (work.title) payload.title = work.title;
+        if (work.edition) payload.edition = work.edition;
+        if (work.year) payload.year = work.year;
+        if (work.fileUrl) payload.file_url = work.fileUrl;
+
+        const { data, error } = await supabase
+            .from('works')
+            .update(payload)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
     },
 
     deleteWork: async (id: string): Promise<void> => {
-        const response = await fetch(`${API_URL}/works/${id}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Failed to delete work');
+        const { error } = await supabase
+            .from('works')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
     },
 
-    // 上传作品文件并更新数据库
+    // 上传后更新数据库字段
     uploadWorkFile: async (workId: string, fileUrl: string): Promise<any> => {
-        const response = await fetch(`${API_URL}/works/${workId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fileUrl }),
-        });
-        if (!response.ok) throw new Error('Failed to update work with file URL');
-        return response.json();
+        const { data, error } = await supabase
+            .from('works')
+            .update({ file_url: fileUrl })
+            .eq('id', workId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        // 返回统一格式，将 file_url 转换为 fileUrl 以匹配前端类型
+        return { ...data, fileUrl: data.file_url };
     },
 
-    // Recordings
-    createRecording: async (recording: any): Promise<any> => {
-        const response = await fetch(`${API_URL}/recordings`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(recording),
-        });
-        if (!response.ok) throw new Error('Failed to create recording');
-        return response.json();
+    // --- Recordings (录音) ---
+    createRecording: async (recording: any): Promise<Recording> => {
+        const payload = {
+            composer_id: recording.composer_id,
+            title: recording.title,
+            performer: recording.performer,
+            duration: recording.duration,
+            year: recording.year
+        };
+
+        const { data, error } = await supabase
+            .from('recordings')
+            .insert([payload])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
     },
 
-    updateRecording: async (id: string, recording: any): Promise<any> => {
-        const response = await fetch(`${API_URL}/recordings/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(recording),
-        });
-        if (!response.ok) throw new Error('Failed to update recording');
-        return response.json();
+    updateRecording: async (id: string, recording: any): Promise<Recording> => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id: _, created_at, composer_id, ...updates } = recording;
+
+        const { data, error } = await supabase
+            .from('recordings')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
     },
 
     deleteRecording: async (id: string): Promise<void> => {
-        const response = await fetch(`${API_URL}/recordings/${id}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Failed to delete recording');
+        const { error } = await supabase
+            .from('recordings')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
     },
 };
