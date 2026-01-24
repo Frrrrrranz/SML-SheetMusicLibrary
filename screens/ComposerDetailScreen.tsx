@@ -1,0 +1,745 @@
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, MoreHorizontal, Plus, Camera, FileText, Music, Check, Trash2, Edit2, Disc, PlayCircle, AlertCircle } from 'lucide-react';
+import { ViewMode, Composer, Work, Recording } from '../types';
+import { Modal } from '../components/Modal';
+import { api } from '../api';
+
+interface ComposerDetailScreenProps {
+  composerId: string;
+  composers: Composer[];
+  onUpdateComposer: (composer: Composer) => void;
+  onDeleteComposer: (id: string) => void;
+  onBack: () => void;
+}
+
+export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
+  composerId,
+  composers,
+  onUpdateComposer,
+  onDeleteComposer,
+  onBack
+}) => {
+  const [viewMode, setViewMode] = useState<ViewMode>('Sheet Music');
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Modal States
+  const [showWorkModal, setShowWorkModal] = useState(false);
+  const [showRecordingModal, setShowRecordingModal] = useState(false);
+  const [showPortraitModal, setShowPortraitModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<'pdf' | 'audio'>('pdf');
+
+  // Work Form States
+  const [editingWorkId, setEditingWorkId] = useState<string | null>(null);
+  const [workFormTitle, setWorkFormTitle] = useState('');
+  const [workFormYear, setWorkFormYear] = useState('');
+  const [workFormEdition, setWorkFormEdition] = useState('');
+
+  // Recording Form States
+  const [editingRecordingId, setEditingRecordingId] = useState<string | null>(null);
+  const [recFormTitle, setRecFormTitle] = useState('');
+  const [recFormPerformer, setRecFormPerformer] = useState('');
+  const [recFormYear, setRecFormYear] = useState('');
+  const [recFormDuration, setRecFormDuration] = useState('');
+
+  const composer = composers.find(c => c.id === composerId);
+
+  // Scroll to top on mount and fetch details
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const fetchDetails = async () => {
+      if (composerId) {
+        try {
+          const detailedComposer = await api.getComposer(composerId);
+          onUpdateComposer(detailedComposer);
+        } catch (error) {
+          console.error('Failed to fetch composer details:', error);
+        }
+      }
+    };
+    fetchDetails();
+  }, [composerId]);
+
+  if (!composer) return <div className="p-8 text-center text-gray-500">Composer not found</div>;
+
+  // --- Handlers: General ---
+  const handleToggleEdit = () => {
+    setIsEditing(!isEditing);
+  };
+
+  const handleUpdateInfo = async (field: 'name' | 'period', value: string) => {
+    try {
+      const updatedComposer = await api.updateComposer(composer.id, { [field]: value });
+      onUpdateComposer(updatedComposer);
+    } catch (error) {
+      console.error('Failed to update info:', error);
+    }
+  };
+
+  const confirmDeleteComposer = async () => {
+    try {
+      await api.deleteComposer(composer.id);
+      onDeleteComposer(composer.id);
+    } catch (error) {
+      console.error('Failed to delete composer:', error);
+    }
+  };
+
+  // --- Handlers: Works (Sheet Music) ---
+  const handleDeleteWork = async (workId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to remove this piece?')) {
+      try {
+        await api.deleteWork(workId);
+        const updatedWorks = composer.works.filter(w => w.id !== workId);
+        onUpdateComposer({
+          ...composer,
+          works: updatedWorks,
+          sheetMusicCount: updatedWorks.length
+        });
+      } catch (error) {
+        console.error('Failed to delete work:', error);
+      }
+    }
+  };
+
+  const openAddWorkModal = () => {
+    setEditingWorkId(null);
+    setWorkFormTitle('');
+    setWorkFormYear('');
+    setWorkFormEdition('');
+    setShowWorkModal(true);
+  };
+
+  const openEditWorkModal = (work: Work, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingWorkId(work.id);
+    setWorkFormTitle(work.title);
+    setWorkFormYear(work.year);
+    setWorkFormEdition(work.edition);
+    setShowWorkModal(true);
+  };
+
+  const handleSaveWork = async () => {
+    if (!workFormTitle) return;
+
+    try {
+      if (editingWorkId) {
+        // Update existing work
+        const updatedWork = await api.updateWork(editingWorkId, {
+          title: workFormTitle,
+          year: workFormYear || 'Unknown',
+          edition: workFormEdition || 'Standard Edition'
+        });
+
+        const updatedWorks = composer.works.map(w =>
+          w.id === editingWorkId ? updatedWork : w
+        );
+        onUpdateComposer({
+          ...composer,
+          works: updatedWorks
+        });
+      } else {
+        // Add new work
+        const newWorkPayload = {
+          composer_id: composer.id,
+          title: workFormTitle,
+          year: workFormYear || 'Unknown',
+          edition: workFormEdition || 'Standard Edition'
+        };
+        const newWork = await api.createWork(newWorkPayload);
+
+        const updatedWorks = [newWork, ...(composer.works || [])];
+        onUpdateComposer({
+          ...composer,
+          works: updatedWorks,
+          sheetMusicCount: updatedWorks.length
+        });
+      }
+
+      // Reset and Close
+      setEditingWorkId(null);
+      setWorkFormTitle('');
+      setWorkFormYear('');
+      setWorkFormEdition('');
+      setShowWorkModal(false);
+    } catch (error) {
+      console.error('Failed to save work:', error);
+    }
+  };
+
+  // --- Handlers: Recordings ---
+  const handleDeleteRecording = async (recId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to remove this recording?')) {
+      try {
+        await api.deleteRecording(recId);
+        const updatedRecordings = composer.recordings.filter(r => r.id !== recId);
+        onUpdateComposer({
+          ...composer,
+          recordings: updatedRecordings,
+          recordingCount: updatedRecordings.length
+        });
+      } catch (error) {
+        console.error('Failed to delete recording:', error);
+      }
+    }
+  };
+
+  const openAddRecordingModal = () => {
+    setEditingRecordingId(null);
+    setRecFormTitle('');
+    setRecFormPerformer('');
+    setRecFormYear('');
+    setRecFormDuration('');
+    setShowRecordingModal(true);
+  };
+
+  const openEditRecordingModal = (rec: Recording, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingRecordingId(rec.id);
+    setRecFormTitle(rec.title);
+    setRecFormPerformer(rec.performer);
+    setRecFormYear(rec.year);
+    setRecFormDuration(rec.duration);
+    setShowRecordingModal(true);
+  };
+
+  const handleSaveRecording = async () => {
+    if (!recFormTitle) return;
+
+    try {
+      if (editingRecordingId) {
+        // Update
+        const updatedRecording = await api.updateRecording(editingRecordingId, {
+          title: recFormTitle,
+          performer: recFormPerformer,
+          year: recFormYear,
+          duration: recFormDuration || '0:00'
+        });
+
+        const updatedRecordings = composer.recordings.map(r =>
+          r.id === editingRecordingId ? updatedRecording : r
+        );
+        onUpdateComposer({ ...composer, recordings: updatedRecordings });
+      } else {
+        // Create
+        const newRecPayload = {
+          composer_id: composer.id,
+          title: recFormTitle,
+          performer: recFormPerformer,
+          year: recFormYear,
+          duration: recFormDuration || '0:00'
+        };
+        const newRec = await api.createRecording(newRecPayload);
+
+        const updatedRecordings = [newRec, ...(composer.recordings || [])];
+        onUpdateComposer({
+          ...composer,
+          recordings: updatedRecordings,
+          recordingCount: updatedRecordings.length
+        });
+      }
+      setShowRecordingModal(false);
+    } catch (error) {
+      console.error('Failed to save recording:', error);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background pb-24 relative">
+      {/* Top Nav */}
+      <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 bg-background/95 backdrop-blur-md">
+        <button
+          onClick={onBack}
+          className="flex size-10 items-center justify-center rounded-full text-oldGold hover:bg-black/5 transition-colors"
+        >
+          <ChevronLeft size={28} />
+        </button>
+        <button
+          onClick={handleToggleEdit}
+          className={`
+            px-3 py-1 text-base font-semibold transition-colors duration-200
+            ${isEditing ? 'text-textMain' : 'text-oldGold hover:opacity-80'}
+          `}
+        >
+          {isEditing ? 'Done' : 'Edit'}
+        </button>
+      </div>
+
+      {/* Hero Section */}
+      <div className="flex flex-col items-center px-6 pt-2 pb-8">
+        <div
+          className="relative mb-6 group cursor-pointer"
+          onClick={() => isEditing ? setShowPortraitModal(true) : null}
+        >
+          <div className="relative h-44 w-44 rounded-full shadow-lg overflow-hidden border-4 border-white bg-gray-200 ring-1 ring-black/5">
+            <img
+              src={composer.image}
+              alt={composer.name}
+              className="w-full h-full object-cover"
+            />
+            {isEditing && (
+              <div className="absolute inset-0 bg-black/30 flex items-center justify-center animate-in fade-in duration-200">
+                <Camera className="text-white drop-shadow-md" size={32} />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="text-center space-y-2 w-full max-w-xs">
+          {isEditing ? (
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-3">
+              <input
+                type="text"
+                value={composer.name}
+                onChange={(e) => handleUpdateInfo('name', e.target.value)}
+                className="w-full text-center text-3xl font-serif font-bold text-textMain bg-transparent border-b border-oldGold/50 focus:border-oldGold focus:outline-none pb-1"
+                placeholder="Composer Name"
+              />
+              <input
+                type="text"
+                value={composer.period}
+                onChange={(e) => handleUpdateInfo('period', e.target.value)}
+                className="w-full text-center text-xs font-sans font-bold tracking-widest text-textSub uppercase bg-transparent border-b border-oldGold/50 focus:border-oldGold focus:outline-none pb-1"
+                placeholder="PERIOD"
+              />
+            </div>
+          ) : (
+            <>
+              <h1 className="text-3xl md:text-4xl font-serif font-bold text-textMain leading-tight">
+                {composer.name}
+              </h1>
+              <p className="text-xs font-sans font-bold tracking-widest text-textSub uppercase pt-2">
+                {composer.period}
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Segmented Control */}
+      <div className="px-6 pb-6 sticky top-[64px] z-10 bg-background transition-all duration-200">
+        <div className="flex h-10 w-full items-center justify-center rounded-lg bg-[#EBEAE6] p-1">
+          {(['Sheet Music', 'Recordings'] as const).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              className={`
+                relative flex-1 h-full rounded-md text-sm font-semibold transition-all duration-200
+                ${viewMode === mode
+                  ? 'bg-white text-textMain shadow-sm'
+                  : 'text-textSub hover:text-textMain'
+                }
+              `}
+            >
+              {mode}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content List */}
+      <div className="flex flex-col px-0">
+
+        {/* SHEET MUSIC VIEW */}
+        {viewMode === 'Sheet Music' && (
+          <>
+            {composer.works && composer.works.map((work) => (
+              <div
+                key={work.id}
+                className="group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors cursor-pointer border-b border-divider last:border-0 relative overflow-hidden"
+              >
+                {isEditing ? (
+                  <button
+                    onClick={(e) => handleDeleteWork(work.id, e)}
+                    className="shrink-0 text-red-500 hover:bg-red-50 p-2 rounded-full -ml-2 transition-colors"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                ) : (
+                  <div className="shrink-0 text-textSub opacity-70 group-hover:opacity-100 transition-opacity">
+                    <FileText size={24} strokeWidth={1.5} />
+                  </div>
+                )}
+
+                <div className="flex flex-1 flex-col justify-center min-w-0">
+                  <p className="text-textMain text-base font-bold leading-tight truncate font-sans">
+                    {work.title}
+                  </p>
+                  <p className="text-textSub text-sm leading-normal truncate font-medium mt-0.5">
+                    {work.edition} · {work.year}
+                  </p>
+                </div>
+
+                <div className="shrink-0">
+                  {isEditing ? (
+                    <button
+                      onClick={(e) => openEditWorkModal(work, e)}
+                      className="flex size-8 items-center justify-center rounded-full text-textSub hover:text-oldGold hover:bg-black/5 transition-colors"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                  ) : (
+                    <button className="flex size-8 items-center justify-center rounded-full text-textSub hover:text-textMain hover:bg-black/5 transition-colors">
+                      <MoreHorizontal size={20} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+            {(!composer.works || composer.works.length === 0) && (
+              <div className="px-6 py-12 text-center text-gray-400 font-serif italic">
+                No sheet music added yet.
+              </div>
+            )}
+          </>
+        )}
+
+        {/* RECORDINGS VIEW */}
+        {viewMode === 'Recordings' && (
+          <>
+            {composer.recordings && composer.recordings.map((recording) => (
+              <div
+                key={recording.id}
+                className="group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors cursor-pointer border-b border-divider last:border-0 relative"
+              >
+                {/* Left Icon: Trash or Play */}
+                {isEditing ? (
+                  <button
+                    onClick={(e) => handleDeleteRecording(recording.id, e)}
+                    className="shrink-0 text-red-500 hover:bg-red-50 p-2 rounded-full -ml-2 transition-colors"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                ) : (
+                  <div className="shrink-0 text-oldGold opacity-80 group-hover:opacity-100 transition-opacity">
+                    <PlayCircle size={28} strokeWidth={1.5} />
+                  </div>
+                )}
+
+                <div className="flex flex-1 flex-col justify-center min-w-0">
+                  <p className="text-textMain text-base font-bold leading-tight truncate font-sans">
+                    {recording.title}
+                  </p>
+                  <p className="text-textSub text-sm leading-normal truncate font-medium mt-0.5">
+                    {recording.performer} · {recording.year}
+                  </p>
+                </div>
+
+                {/* Right Side: Edit or Duration */}
+                <div className="shrink-0">
+                  {isEditing ? (
+                    <button
+                      onClick={(e) => openEditRecordingModal(recording, e)}
+                      className="flex size-8 items-center justify-center rounded-full text-textSub hover:text-oldGold hover:bg-black/5 transition-colors"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                  ) : (
+                    <div className="text-textSub text-xs font-semibold tracking-wide">
+                      {recording.duration}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            {(!composer.recordings || composer.recordings.length === 0) && (
+              <div className="px-6 py-12 text-center text-gray-400 font-serif italic">
+                No recordings available.
+              </div>
+            )}
+          </>
+        )}
+
+      </div>
+
+      {/* Delete Composer Button (Edit Mode Only) */}
+      {isEditing && (
+        <div className="px-6 py-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex w-full items-center justify-center rounded-xl bg-white border border-red-100 py-4 text-base font-bold text-red-600 shadow-sm hover:bg-red-50 active:scale-[0.98] transition-all"
+          >
+            Delete Composer
+          </button>
+        </div>
+      )}
+
+      {/* FAB - Shows for both modes now */}
+      <button
+        onClick={viewMode === 'Sheet Music' ? openAddWorkModal : openAddRecordingModal}
+        className="fixed bottom-6 right-6 size-14 bg-oldGold text-white rounded-full shadow-xl flex items-center justify-center hover:bg-opacity-90 active:scale-95 transition-all z-30 ring-2 ring-white/20"
+      >
+        <Plus size={28} />
+      </button>
+
+      {/* === MODALS === */}
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        variant="center"
+      >
+        <div className="flex flex-col items-center text-center font-sans px-2">
+          <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-red-50 text-red-500">
+            <AlertCircle size={32} strokeWidth={1.5} />
+          </div>
+          <h3 className="text-xl font-bold text-textMain mb-2 font-serif">Delete Composer?</h3>
+          <p className="text-textSub mb-8 text-[15px] leading-relaxed">
+            Are you sure you want to delete <span className="font-semibold text-textMain">{composer.name}</span>?
+            <br />All associated sheet music and recordings will be permanently removed.
+          </p>
+          <div className="flex w-full gap-3">
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              className="flex-1 py-3.5 rounded-full font-bold text-textMain bg-gray-100 hover:bg-gray-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDeleteComposer}
+              className="flex-1 py-3.5 rounded-full font-bold text-white bg-red-500 hover:bg-red-600 transition-colors shadow-lg shadow-red-500/30"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Add/Edit Work Modal (Sheet Music) */}
+      <Modal
+        isOpen={showWorkModal}
+        onClose={() => setShowWorkModal(false)}
+        variant="bottom"
+        title={editingWorkId ? "Edit Piece" : "Add New Piece"}
+      >
+        <div className="px-6 pt-4 pb-32">
+          {/* Files Section - Only for Adding New */}
+          {!editingWorkId && (
+            <section className="mb-10">
+              <h3 className="mb-5 text-2xl font-bold tracking-tight text-textMain font-serif">Files</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div
+                  onClick={() => setSelectedFile('pdf')}
+                  className={`
+                    relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-2xl p-4 shadow-sm ring-2 transition-all
+                    ${selectedFile === 'pdf' ? 'bg-white ring-oldGold' : 'bg-white ring-transparent hover:ring-oldGold/30'}
+                  `}
+                >
+                  <div className={`mb-3 flex h-14 w-14 items-center justify-center rounded-full transition-colors ${selectedFile === 'pdf' ? 'bg-oldGold/10 text-oldGold' : 'bg-gray-100 text-gray-400'}`}>
+                    <FileText size={32} />
+                  </div>
+                  <p className="text-center text-lg font-semibold leading-tight text-textMain font-serif">Upload Score</p>
+                  <p className="mt-1 text-center text-sm font-medium text-textSub font-sans">PDF</p>
+                  {selectedFile === 'pdf' && (
+                    <div className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-oldGold text-white shadow-sm">
+                      <Check size={14} strokeWidth={3} />
+                    </div>
+                  )}
+                </div>
+
+                <div
+                  onClick={() => setSelectedFile('audio')}
+                  className={`
+                    relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-2xl p-4 shadow-sm ring-2 transition-all
+                    ${selectedFile === 'audio' ? 'bg-white ring-oldGold' : 'bg-white ring-transparent hover:ring-oldGold/30'}
+                  `}
+                >
+                  <div className={`mb-3 flex h-14 w-14 items-center justify-center rounded-full transition-colors ${selectedFile === 'audio' ? 'bg-oldGold/10 text-oldGold' : 'bg-gray-100 text-gray-400'}`}>
+                    <Music size={32} />
+                  </div>
+                  <p className="text-center text-lg font-semibold leading-tight text-textMain font-serif">Link Audio</p>
+                  <p className="mt-1 text-center text-sm font-medium text-textSub font-sans">MP3 or Link</p>
+                  {selectedFile === 'audio' && (
+                    <div className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-oldGold text-white shadow-sm">
+                      <Check size={14} strokeWidth={3} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Details Section */}
+          <section className="mb-10">
+            <h3 className="mb-6 text-2xl font-bold tracking-tight text-textMain font-serif">Details</h3>
+            <div className="flex flex-col gap-6 font-sans">
+              <div className="group relative">
+                <label className="ml-1 mb-1 block text-sm font-medium text-textSub">Work Title</label>
+                <input
+                  type="text"
+                  value={workFormTitle}
+                  onChange={(e) => setWorkFormTitle(e.target.value)}
+                  className="w-full border-0 border-b border-gray-300 bg-transparent px-1 py-2 text-xl font-medium text-textMain placeholder-gray-300 focus:border-oldGold focus:ring-0 transition-colors"
+                  placeholder="e.g. Nocturne Op. 9 No. 2"
+                />
+              </div>
+              <div className="group relative">
+                <label className="ml-1 mb-1 block text-sm font-medium text-textSub">Composer</label>
+                <input
+                  type="text"
+                  className="w-full border-0 border-b border-gray-300 bg-transparent px-1 py-2 text-xl font-medium text-textMain placeholder-gray-300 focus:border-oldGold focus:ring-0 transition-colors"
+                  defaultValue={composer.name}
+                  disabled
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="group relative">
+                  <label className="ml-1 mb-1 block text-sm font-medium text-textSub">Year</label>
+                  <input
+                    type="text"
+                    value={workFormYear}
+                    onChange={(e) => setWorkFormYear(e.target.value)}
+                    className="w-full border-0 border-b border-gray-300 bg-transparent px-1 py-2 text-xl font-medium text-textMain placeholder-gray-300 focus:border-oldGold focus:ring-0 transition-colors"
+                    placeholder="Optional"
+                  />
+                </div>
+                <div className="group relative">
+                  <label className="ml-1 mb-1 block text-sm font-medium text-textSub">Edition</label>
+                  <input
+                    type="text"
+                    value={workFormEdition}
+                    onChange={(e) => setWorkFormEdition(e.target.value)}
+                    className="w-full border-0 border-b border-gray-300 bg-transparent px-1 py-2 text-xl font-medium text-textMain placeholder-gray-300 focus:border-oldGold focus:ring-0 transition-colors"
+                    placeholder="e.g. Henle"
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Footer CTA */}
+          <div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-background via-background/95 to-transparent px-6 pb-8 pt-12 z-20">
+            <button
+              onClick={handleSaveWork}
+              disabled={!workFormTitle}
+              className={`
+                 flex w-full items-center justify-center gap-2 rounded-full py-4 text-lg font-bold text-white shadow-lg transition-transform active:scale-[0.98]
+                 ${workFormTitle ? 'bg-oldGold shadow-oldGold/30 hover:bg-[#d4ac26]' : 'bg-gray-300 cursor-not-allowed'}
+               `}
+            >
+              {editingWorkId ? "Save Changes" : "Save to Library"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Add/Edit Recording Modal */}
+      <Modal
+        isOpen={showRecordingModal}
+        onClose={() => setShowRecordingModal(false)}
+        variant="bottom"
+        title={editingRecordingId ? "Edit Recording" : "Add Recording"}
+      >
+        <div className="px-6 pt-6 pb-32">
+          {/* File placeholder for new recordings */}
+          {!editingRecordingId && (
+            <div className="mb-8 flex justify-center">
+              <div className="flex aspect-square size-32 flex-col items-center justify-center rounded-2xl bg-oldGold/5 border-2 border-dashed border-oldGold/30 text-oldGold">
+                <Music size={40} className="mb-2 opacity-50" />
+                <span className="text-sm font-semibold">Upload Audio</span>
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-6 font-sans">
+            <div className="group relative">
+              <label className="ml-1 mb-1 block text-sm font-medium text-textSub">Title</label>
+              <input
+                type="text"
+                value={recFormTitle}
+                onChange={(e) => setRecFormTitle(e.target.value)}
+                className="w-full border-0 border-b border-gray-300 bg-transparent px-1 py-2 text-xl font-medium text-textMain placeholder-gray-300 focus:border-oldGold focus:ring-0 transition-colors"
+                placeholder="e.g. Ballade No. 1"
+              />
+            </div>
+            <div className="group relative">
+              <label className="ml-1 mb-1 block text-sm font-medium text-textSub">Performer</label>
+              <input
+                type="text"
+                value={recFormPerformer}
+                onChange={(e) => setRecFormPerformer(e.target.value)}
+                className="w-full border-0 border-b border-gray-300 bg-transparent px-1 py-2 text-xl font-medium text-textMain placeholder-gray-300 focus:border-oldGold focus:ring-0 transition-colors"
+                placeholder="e.g. Krystian Zimerman"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="group relative">
+                <label className="ml-1 mb-1 block text-sm font-medium text-textSub">Year</label>
+                <input
+                  type="text"
+                  value={recFormYear}
+                  onChange={(e) => setRecFormYear(e.target.value)}
+                  className="w-full border-0 border-b border-gray-300 bg-transparent px-1 py-2 text-xl font-medium text-textMain placeholder-gray-300 focus:border-oldGold focus:ring-0 transition-colors"
+                  placeholder="1987"
+                />
+              </div>
+              <div className="group relative">
+                <label className="ml-1 mb-1 block text-sm font-medium text-textSub">Duration</label>
+                <input
+                  type="text"
+                  value={recFormDuration}
+                  onChange={(e) => setRecFormDuration(e.target.value)}
+                  className="w-full border-0 border-b border-gray-300 bg-transparent px-1 py-2 text-xl font-medium text-textMain placeholder-gray-300 focus:border-oldGold focus:ring-0 transition-colors"
+                  placeholder="9:15"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-background via-background/95 to-transparent px-6 pb-8 pt-12 z-20">
+            <button
+              onClick={handleSaveRecording}
+              disabled={!recFormTitle}
+              className={`
+                    flex w-full items-center justify-center gap-2 rounded-full py-4 text-lg font-bold text-white shadow-lg transition-transform active:scale-[0.98]
+                    ${recFormTitle ? 'bg-oldGold shadow-oldGold/30 hover:bg-[#d4ac26]' : 'bg-gray-300 cursor-not-allowed'}
+                `}
+            >
+              {editingRecordingId ? "Save Changes" : "Save to Library"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Update Portrait Modal (Center) */}
+      <Modal
+        isOpen={showPortraitModal}
+        onClose={() => setShowPortraitModal(false)}
+        variant="center"
+      >
+        <div className="flex flex-col items-center">
+          <h2 className="mb-8 text-2xl font-serif font-bold text-textMain tracking-tight">Update Portrait</h2>
+
+          <div className="relative mb-8 size-60 rounded-full overflow-hidden shadow-lg ring-1 ring-black/5">
+            <img
+              src={composer.image}
+              className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+            />
+            {/* Overlay grid effect similar to reference */}
+            <div className="absolute inset-0 pointer-events-none opacity-60 mix-blend-overlay">
+              <div className="absolute left-1/3 top-0 bottom-0 w-px bg-white/50"></div>
+              <div className="absolute right-1/3 top-0 bottom-0 w-px bg-white/50"></div>
+              <div className="absolute top-1/3 left-0 right-0 h-px bg-white/50"></div>
+              <div className="absolute bottom-1/3 left-0 right-0 h-px bg-white/50"></div>
+            </div>
+          </div>
+
+          <div className="flex w-full flex-col gap-3 font-sans">
+            <button className="flex w-full items-center justify-center rounded-full bg-oldGold py-3.5 text-[15px] font-bold text-white shadow-md hover:opacity-90 active:scale-[0.98] transition-all">
+              Choose from Device
+            </button>
+            <button
+              onClick={() => setShowPortraitModal(false)}
+              className="flex w-full items-center justify-center rounded-full py-2 text-[15px] font-medium text-oldGold hover:opacity-80 active:scale-[0.98] transition-colors"
+            >
+              Restore Default Sketch
+            </button>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+};
