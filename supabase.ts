@@ -18,16 +18,6 @@ export const uploadSheetMusic = async (file: File, workId: string): Promise<stri
     const fileName = `${workId}.${fileExt}`;
     const filePath = `sheets/${fileName}`;
 
-    // DEBUG: 打印上传信息
-    console.log('=== 上传调试信息 ===');
-    console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
-    console.log('Anon Key 前20字符:', import.meta.env.VITE_SUPABASE_ANON_KEY?.substring(0, 20));
-    console.log('文件名:', file.name);
-    console.log('文件大小:', file.size, 'bytes');
-    console.log('文件类型:', file.type);
-    console.log('存储路径:', filePath);
-    console.log('存储桶:', 'sheet-music');
-
     const { data, error } = await supabase.storage
         .from('sheet-music')
         .upload(filePath, file, {
@@ -36,14 +26,9 @@ export const uploadSheetMusic = async (file: File, workId: string): Promise<stri
         });
 
     if (error) {
-        // DEBUG: 打印详细错误
-        console.error('=== 上传错误详情 ===');
-        console.error('错误消息:', error.message);
-        console.error('完整错误对象:', JSON.stringify(error, null, 2));
+        console.error('上传失败:', error.message);
         throw new Error(`Failed to upload file: ${error.message}`);
     }
-
-    console.log('上传成功:', data);
 
     // 获取公开 URL
     const { data: urlData } = supabase.storage
@@ -52,6 +37,7 @@ export const uploadSheetMusic = async (file: File, workId: string): Promise<stri
 
     return urlData.publicUrl;
 };
+
 
 /**
  * 删除 Supabase Storage 中的文件

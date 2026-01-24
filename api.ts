@@ -13,13 +13,43 @@ export const api = {
             .order('name');
 
         if (error) throw error;
-        // NOTE: 列表页面不需要关联数据，初始化空数组避免 undefined 问题
+
+        // 获取所有作曲家的作品和录音数量
+        const composerIds = (data || []).map(c => c.id);
+
+        // 批量查询作品数量
+        const { data: worksCount } = await supabase
+            .from('works')
+            .select('composer_id')
+            .in('composer_id', composerIds);
+
+        // 批量查询录音数量
+        const { data: recordingsCount } = await supabase
+            .from('recordings')
+            .select('composer_id')
+            .in('composer_id', composerIds);
+
+        // 统计每个作曲家的数量
+        const worksCounts: Record<string, number> = {};
+        const recordingsCounts: Record<string, number> = {};
+
+        (worksCount || []).forEach(w => {
+            worksCounts[w.composer_id] = (worksCounts[w.composer_id] || 0) + 1;
+        });
+
+        (recordingsCount || []).forEach(r => {
+            recordingsCounts[r.composer_id] = (recordingsCounts[r.composer_id] || 0) + 1;
+        });
+
         return (data || []).map(composer => ({
             ...composer,
+            sheetMusicCount: worksCounts[composer.id] || 0,
+            recordingCount: recordingsCounts[composer.id] || 0,
             works: [],
             recordings: []
         }));
     },
+
 
     getComposer: async (id: string): Promise<Composer> => {
         // 1. 获取作曲家基本信息

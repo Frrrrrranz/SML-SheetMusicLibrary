@@ -6,8 +6,8 @@ import { ComposersScreen } from './screens/ComposersScreen';
 import { ComposerDetailScreen } from './screens/ComposerDetailScreen';
 import { SearchScreen } from './screens/SearchScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
-import { COMPOSERS } from './constants';
 import { Composer } from './types';
+
 
 const AppContent: React.FC = () => {
   const location = useLocation();
