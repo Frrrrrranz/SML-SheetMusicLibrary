@@ -16,6 +16,7 @@ class Work(CamelModel):
     title: str
     edition: Optional[str] = None
     year: Optional[str] = None
+    file_url: Optional[str] = None
     created_at: Optional[str] = None
 
 class Recording(CamelModel):

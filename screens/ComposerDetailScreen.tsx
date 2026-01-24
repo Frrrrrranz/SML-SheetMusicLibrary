@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, MoreHorizontal, Plus, Camera, FileText, Music, Check, Trash2, Edit2, Disc, PlayCircle, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, MoreHorizontal, Plus, Camera, FileText, Music, Check, Trash2, Edit2, Disc, PlayCircle, AlertCircle, Upload, Download, Loader2 } from 'lucide-react';
 import { ViewMode, Composer, Work, Recording } from '../types';
 import { Modal } from '../components/Modal';
 import { api } from '../api';
+import { uploadSheetMusic } from '../supabase';
 
 interface ComposerDetailScreenProps {
   composerId: string;
@@ -34,6 +35,9 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   const [workFormTitle, setWorkFormTitle] = useState('');
   const [workFormYear, setWorkFormYear] = useState('');
   const [workFormEdition, setWorkFormEdition] = useState('');
+  const [workFormFile, setWorkFormFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Recording Form States
   const [editingRecordingId, setEditingRecordingId] = useState<string | null>(null);
@@ -123,6 +127,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   const handleSaveWork = async () => {
     if (!workFormTitle) return;
 
+    setIsUploading(true);
     try {
       if (editingWorkId) {
         // Update existing work
@@ -131,6 +136,13 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
           year: workFormYear || 'Unknown',
           edition: workFormEdition || 'Standard Edition'
         });
+
+        // 如果选择了新文件，上传并更新
+        if (workFormFile) {
+          const fileUrl = await uploadSheetMusic(workFormFile, editingWorkId);
+          const workWithFile = await api.uploadWorkFile(editingWorkId, fileUrl);
+          updatedWork.fileUrl = workWithFile.fileUrl;
+        }
 
         const updatedWorks = composer.works.map(w =>
           w.id === editingWorkId ? updatedWork : w
@@ -149,6 +161,13 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
         };
         const newWork = await api.createWork(newWorkPayload);
 
+        // 如果选择了文件，上传并更新
+        if (workFormFile) {
+          const fileUrl = await uploadSheetMusic(workFormFile, newWork.id);
+          const workWithFile = await api.uploadWorkFile(newWork.id, fileUrl);
+          newWork.fileUrl = workWithFile.fileUrl;
+        }
+
         const updatedWorks = [newWork, ...(composer.works || [])];
         onUpdateComposer({
           ...composer,
@@ -162,9 +181,13 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
       setWorkFormTitle('');
       setWorkFormYear('');
       setWorkFormEdition('');
+      setWorkFormFile(null);
       setShowWorkModal(false);
     } catch (error) {
       console.error('Failed to save work:', error);
+      alert('保存失败，请检查文件格式或网络连接');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -372,7 +395,19 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
                   </p>
                 </div>
 
-                <div className="shrink-0">
+                <div className="shrink-0 flex items-center gap-2">
+                  {/* 如果有 PDF 文件，显示查看按钮 */}
+                  {work.fileUrl && !isEditing && (
+                    <a
+                      href={work.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex size-8 items-center justify-center rounded-full text-oldGold hover:bg-oldGold/10 transition-colors"
+                    >
+                      <Download size={18} />
+                    </a>
+                  )}
                   {isEditing ? (
                     <button
                       onClick={(e) => openEditWorkModal(work, e)}
@@ -516,51 +551,45 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
         title={editingWorkId ? "Edit Piece" : "Add New Piece"}
       >
         <div className="px-6 pt-4 pb-32">
-          {/* Files Section - Only for Adding New */}
-          {!editingWorkId && (
-            <section className="mb-10">
-              <h3 className="mb-5 text-2xl font-bold tracking-tight text-textMain font-serif">Files</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div
-                  onClick={() => setSelectedFile('pdf')}
-                  className={`
-                    relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-2xl p-4 shadow-sm ring-2 transition-all
-                    ${selectedFile === 'pdf' ? 'bg-white ring-oldGold' : 'bg-white ring-transparent hover:ring-oldGold/30'}
-                  `}
-                >
-                  <div className={`mb-3 flex h-14 w-14 items-center justify-center rounded-full transition-colors ${selectedFile === 'pdf' ? 'bg-oldGold/10 text-oldGold' : 'bg-gray-100 text-gray-400'}`}>
-                    <FileText size={32} />
+          {/* PDF Upload Section */}
+          <section className="mb-10">
+            <h3 className="mb-5 text-2xl font-bold tracking-tight text-textMain font-serif">上传乐谱</h3>
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept=".pdf"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) setWorkFormFile(file);
+              }}
+            />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className={`
+                flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed cursor-pointer transition-all
+                ${workFormFile ? 'border-oldGold bg-oldGold/5' : 'border-gray-300 hover:border-oldGold/50'}
+              `}
+            >
+              {workFormFile ? (
+                <>
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-oldGold/10 text-oldGold mb-3">
+                    <Check size={28} />
                   </div>
-                  <p className="text-center text-lg font-semibold leading-tight text-textMain font-serif">Upload Score</p>
-                  <p className="mt-1 text-center text-sm font-medium text-textSub font-sans">PDF</p>
-                  {selectedFile === 'pdf' && (
-                    <div className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-oldGold text-white shadow-sm">
-                      <Check size={14} strokeWidth={3} />
-                    </div>
-                  )}
-                </div>
-
-                <div
-                  onClick={() => setSelectedFile('audio')}
-                  className={`
-                    relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-2xl p-4 shadow-sm ring-2 transition-all
-                    ${selectedFile === 'audio' ? 'bg-white ring-oldGold' : 'bg-white ring-transparent hover:ring-oldGold/30'}
-                  `}
-                >
-                  <div className={`mb-3 flex h-14 w-14 items-center justify-center rounded-full transition-colors ${selectedFile === 'audio' ? 'bg-oldGold/10 text-oldGold' : 'bg-gray-100 text-gray-400'}`}>
-                    <Music size={32} />
+                  <p className="text-textMain font-semibold text-center">{workFormFile.name}</p>
+                  <p className="text-textSub text-sm mt-1">点击更换文件</p>
+                </>
+              ) : (
+                <>
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-400 mb-3">
+                    <Upload size={28} />
                   </div>
-                  <p className="text-center text-lg font-semibold leading-tight text-textMain font-serif">Link Audio</p>
-                  <p className="mt-1 text-center text-sm font-medium text-textSub font-sans">MP3 or Link</p>
-                  {selectedFile === 'audio' && (
-                    <div className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-oldGold text-white shadow-sm">
-                      <Check size={14} strokeWidth={3} />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
+                  <p className="text-textMain font-semibold">选择 PDF 文件</p>
+                  <p className="text-textSub text-sm mt-1">支持 PDF 格式</p>
+                </>
+              )}
+            </div>
+          </section>
 
           {/* Details Section */}
           <section className="mb-10">
@@ -614,13 +643,20 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
           <div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-background via-background/95 to-transparent px-6 pb-8 pt-12 z-20">
             <button
               onClick={handleSaveWork}
-              disabled={!workFormTitle}
+              disabled={!workFormTitle || isUploading}
               className={`
                  flex w-full items-center justify-center gap-2 rounded-full py-4 text-lg font-bold text-white shadow-lg transition-transform active:scale-[0.98]
-                 ${workFormTitle ? 'bg-oldGold shadow-oldGold/30 hover:bg-[#d4ac26]' : 'bg-gray-300 cursor-not-allowed'}
+                 ${workFormTitle && !isUploading ? 'bg-oldGold shadow-oldGold/30 hover:bg-[#d4ac26]' : 'bg-gray-300 cursor-not-allowed'}
                `}
             >
-              {editingWorkId ? "Save Changes" : "Save to Library"}
+              {isUploading ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  上传中...
+                </>
+              ) : (
+                editingWorkId ? "保存更改" : "保存到曲库"
+              )}
             </button>
           </div>
         </div>

@@ -16,6 +16,7 @@ create table works (
   title text not null,
   edition text,
   year text,
+  file_url text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

@@ -6,6 +6,7 @@ export interface Work {
   title: string;
   edition: string;
   year: string;
+  fileUrl?: string;
 }
 
 export interface Recording {

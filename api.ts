@@ -70,6 +70,17 @@ export const api = {
         if (!response.ok) throw new Error('Failed to delete work');
     },
 
+    // 上传作品文件并更新数据库
+    uploadWorkFile: async (workId: string, fileUrl: string): Promise<any> => {
+        const response = await fetch(`${API_URL}/works/${workId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileUrl }),
+        });
+        if (!response.ok) throw new Error('Failed to update work with file URL');
+        return response.json();
+    },
+
     // Recordings
     createRecording: async (recording: any): Promise<any> => {
         const response = await fetch(`${API_URL}/recordings`, {
