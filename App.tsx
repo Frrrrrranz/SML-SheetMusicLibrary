@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from './api';
 import { HashRouter, Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { BottomNav } from './components/BottomNav';
 import { ComposersScreen } from './screens/ComposersScreen';
 import { ComposerDetailScreen } from './screens/ComposerDetailScreen';
@@ -132,9 +133,12 @@ const DetailWrapper = ({
 
 const App: React.FC = () => {
   return (
-    <HashRouter>
-      <AppContent />
-    </HashRouter>
+    <>
+      <HashRouter>
+        <AppContent />
+      </HashRouter>
+      <Analytics />
+    </>
   );
 };
 
