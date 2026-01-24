@@ -3,7 +3,7 @@ import { ChevronLeft, Plus, Camera, FileText, Music, Check, Trash2, Edit2, PlayC
 import { ViewMode, Composer, Work, Recording } from '../types';
 import { Modal } from '../components/Modal';
 import { api } from '../api';
-import { uploadSheetMusic } from '../supabase';
+import { uploadSheetMusic, uploadAvatar, deleteAvatar } from '../supabase';
 
 interface ComposerDetailScreenProps {
   composerId: string;
@@ -38,6 +38,10 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   const [workFormFile, setWorkFormFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Avatar Upload States
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   // Recording Form States
   const [editingRecordingId, setEditingRecordingId] = useState<string | null>(null);
@@ -91,6 +95,80 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
       onDeleteComposer(composer.id);
     } catch (error) {
       console.error('Failed to delete composer:', error);
+    }
+  };
+
+  // --- Handlers: Avatar ---
+  const handleAvatarFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 验证文件类型
+    if (!file.type.startsWith('image/')) {
+      alert('请选择图片文件');
+      return;
+    }
+    // 验证文件大小 (最大 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('图片大小不能超过 5MB');
+      return;
+    }
+
+    setIsAvatarUploading(true);
+    try {
+      // 删除旧头像（如果是自定义上传的）
+      if (composer.image) {
+        await deleteAvatar(composer.image);
+      }
+
+      // 上传新头像
+      const avatarUrl = await uploadAvatar(file, composer.id);
+
+      // 更新数据库
+      const updatedComposer = await api.updateComposer(composer.id, { image: avatarUrl });
+
+      // 更新本地状态
+      onUpdateComposer({
+        ...composer,
+        image: updatedComposer.image
+      });
+
+      setShowPortraitModal(false);
+    } catch (error) {
+      console.error('Failed to upload avatar:', error);
+      alert('头像上传失败，请重试');
+    } finally {
+      setIsAvatarUploading(false);
+      // 重置 input 以便可以重复选择同一文件
+      if (avatarInputRef.current) {
+        avatarInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRestoreDefaultAvatar = async () => {
+    setIsAvatarUploading(true);
+    try {
+      // 删除自定义头像（如果有）
+      if (composer.image) {
+        await deleteAvatar(composer.image);
+      }
+
+      // 恢复默认头像
+      const defaultImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(composer.name)}&background=random&size=256`;
+      const updatedComposer = await api.updateComposer(composer.id, { image: defaultImage });
+
+      onUpdateComposer({
+        ...composer,
+        image: updatedComposer.image
+      });
+
+      setShowPortraitModal(false);
+    } catch (error) {
+      console.error('Failed to restore default avatar:', error);
+      alert('恢复默认头像失败，请重试');
+    } finally {
+      setIsAvatarUploading(false);
     }
   };
 
@@ -736,33 +814,57 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
       {/* Update Portrait Modal (Center) */}
       <Modal
         isOpen={showPortraitModal}
-        onClose={() => setShowPortraitModal(false)}
+        onClose={() => !isAvatarUploading && setShowPortraitModal(false)}
         variant="center"
       >
         <div className="flex flex-col items-center">
           <h2 className="mb-8 text-2xl font-serif font-bold text-textMain tracking-tight">Update Portrait</h2>
+
+          {/* Hidden file input */}
+          <input
+            type="file"
+            ref={avatarInputRef}
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarFileSelect}
+          />
 
           <div className="relative mb-8 size-60 rounded-full overflow-hidden shadow-lg ring-1 ring-black/5">
             <img
               src={composer.image}
               className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
             />
+            {/* Loading overlay */}
+            {isAvatarUploading && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <Loader2 size={40} className="text-white animate-spin" />
+              </div>
+            )}
             {/* Overlay grid effect similar to reference */}
-            <div className="absolute inset-0 pointer-events-none opacity-60 mix-blend-overlay">
-              <div className="absolute left-1/3 top-0 bottom-0 w-px bg-white/50"></div>
-              <div className="absolute right-1/3 top-0 bottom-0 w-px bg-white/50"></div>
-              <div className="absolute top-1/3 left-0 right-0 h-px bg-white/50"></div>
-              <div className="absolute bottom-1/3 left-0 right-0 h-px bg-white/50"></div>
-            </div>
+            {!isAvatarUploading && (
+              <div className="absolute inset-0 pointer-events-none opacity-60 mix-blend-overlay">
+                <div className="absolute left-1/3 top-0 bottom-0 w-px bg-white/50"></div>
+                <div className="absolute right-1/3 top-0 bottom-0 w-px bg-white/50"></div>
+                <div className="absolute top-1/3 left-0 right-0 h-px bg-white/50"></div>
+                <div className="absolute bottom-1/3 left-0 right-0 h-px bg-white/50"></div>
+              </div>
+            )}
           </div>
 
           <div className="flex w-full flex-col gap-3 font-sans">
-            <button className="flex w-full items-center justify-center rounded-full bg-oldGold py-3.5 text-[15px] font-bold text-white shadow-md hover:opacity-90 active:scale-[0.98] transition-all">
-              Choose from Device
+            <button
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={isAvatarUploading}
+              className={`flex w-full items-center justify-center rounded-full bg-oldGold py-3.5 text-[15px] font-bold text-white shadow-md transition-all ${isAvatarUploading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90 active:scale-[0.98]'
+                }`}
+            >
+              {isAvatarUploading ? '上传中...' : 'Choose from Device'}
             </button>
             <button
-              onClick={() => setShowPortraitModal(false)}
-              className="flex w-full items-center justify-center rounded-full py-2 text-[15px] font-medium text-oldGold hover:opacity-80 active:scale-[0.98] transition-colors"
+              onClick={handleRestoreDefaultAvatar}
+              disabled={isAvatarUploading}
+              className={`flex w-full items-center justify-center rounded-full py-2 text-[15px] font-medium text-oldGold transition-colors ${isAvatarUploading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80 active:scale-[0.98]'
+                }`}
             >
               Restore Default Sketch
             </button>

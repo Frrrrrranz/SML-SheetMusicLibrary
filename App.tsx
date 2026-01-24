@@ -30,12 +30,14 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleAddComposer = async (newComposer: Composer) => {
+  const handleAddComposer = async (newComposer: Composer): Promise<Composer | null> => {
     try {
       const created = await api.createComposer(newComposer);
       setComposers((prev) => [...prev, created]);
+      return created;
     } catch (error) {
       console.error('Failed to create composer:', error);
+      return null;
     }
   };
 
@@ -72,6 +74,7 @@ const AppContent: React.FC = () => {
                 composers={composers}
                 onComposerSelect={(id) => navigate(`/composer/${id}`)}
                 onAddComposer={handleAddComposer}
+                onUpdateComposer={handleUpdateComposer}
               />
             }
           />

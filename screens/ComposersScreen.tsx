@@ -1,33 +1,101 @@
-import React, { useState } from 'react';
-import { ChevronRight, Plus, Camera, Library } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { ChevronRight, Plus, Camera, Library, Loader2 } from 'lucide-react';
 import { Composer } from '../types';
 import { Modal } from '../components/Modal';
+import { uploadAvatar } from '../supabase';
+import { api } from '../api';
 
 interface ComposersScreenProps {
   composers: Composer[];
   onComposerSelect: (id: string) => void;
-  onAddComposer: (composer: Composer) => void;
+  onAddComposer: (composer: Composer) => Promise<Composer | null>;
+  onUpdateComposer?: (composer: Composer) => void;
 }
 
-export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onComposerSelect, onAddComposer }) => {
+export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onComposerSelect, onAddComposer, onUpdateComposer }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState('');
   const [period, setPeriod] = useState('');
 
-  const handleSave = () => {
-    if (!name || !period) return;
+  // 头像上传相关状态
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
-    // NOTE: 不传递 id，让数据库自动生成 UUID
-    const newComposer = {
-      name,
-      period,
-      image: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=256`,
-    };
+  // 处理头像文件选择
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // 验证文件类型
+      if (!file.type.startsWith('image/')) {
+        alert('请选择图片文件');
+        return;
+      }
+      // 验证文件大小 (最大 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('图片大小不能超过 5MB');
+        return;
+      }
+      setImageFile(file);
+      // 创建预览 URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
+  };
 
-    onAddComposer(newComposer as Composer);
-    setIsModalOpen(false);
+  // 重置表单
+  const resetForm = () => {
     setName('');
     setPeriod('');
+    setImageFile(null);
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImagePreview(null);
+    setIsUploading(false);
+  };
+
+  const handleSave = async () => {
+    if (!name || !period) return;
+
+    setIsUploading(true);
+    try {
+      // NOTE: 先用默认头像创建作曲家，获取 ID 后再上传自定义头像
+      const defaultImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=256`;
+
+      const newComposer = {
+        name,
+        period,
+        image: defaultImage,
+      };
+
+      // 创建作曲家并获取返回的对象（包含 ID）
+      const created = await onAddComposer(newComposer as Composer);
+
+      if (!created) {
+        throw new Error('Failed to create composer');
+      }
+
+      // 如果用户选择了头像图片，上传并更新
+      if (imageFile && created.id) {
+        const avatarUrl = await uploadAvatar(imageFile, created.id);
+        // 更新作曲家的头像 URL
+        const updated = await api.updateComposer(created.id, { image: avatarUrl });
+        // 通知父组件更新状态
+        if (onUpdateComposer) {
+          onUpdateComposer({ ...created, image: updated.image });
+        }
+      }
+
+      setIsModalOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error('Failed to save composer:', error);
+      alert('创建失败，请重试');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -103,10 +171,33 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
         title="Add Composer"
       >
         <div className="px-6 pt-6 pb-32">
-          {/* Avatar Placeholder */}
+          {/* Avatar Upload */}
           <div className="flex justify-center mb-8">
-            <div className="h-32 w-32 bg-[#F2F2F7] rounded-full flex items-center justify-center shadow-inner ring-4 ring-white relative overflow-hidden cursor-pointer hover:bg-gray-200 transition-colors">
-              <Camera size={40} className="text-gray-400 opacity-50" strokeWidth={1.5} />
+            <input
+              type="file"
+              ref={avatarInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarSelect}
+            />
+            <div
+              onClick={() => avatarInputRef.current?.click()}
+              className="h-32 w-32 bg-[#F2F2F7] rounded-full flex items-center justify-center shadow-inner ring-4 ring-white relative overflow-hidden cursor-pointer hover:bg-gray-200 transition-colors group"
+            >
+              {imagePreview ? (
+                <>
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Camera size={32} className="text-white" strokeWidth={1.5} />
+                  </div>
+                </>
+              ) : (
+                <Camera size={40} className="text-gray-400 opacity-50" strokeWidth={1.5} />
+              )}
             </div>
           </div>
 
@@ -138,15 +229,22 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
           <div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-background via-background/95 to-transparent px-6 pb-8 pt-12 z-20">
             <button
               onClick={handleSave}
-              disabled={!name || !period}
+              disabled={!name || !period || isUploading}
               className={`
                  flex w-full items-center justify-center gap-2 rounded-full py-4 text-lg font-bold text-white shadow-lg transition-all
-                 ${name && period
+                 ${name && period && !isUploading
                   ? 'bg-oldGold shadow-oldGold/30 hover:bg-[#d4ac26] active:scale-[0.98]'
                   : 'bg-gray-300 cursor-not-allowed'}
                `}
             >
-              Add Composer
+              {isUploading ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  创建中...
+                </>
+              ) : (
+                'Add Composer'
+              )}
             </button>
           </div>
         </div>
