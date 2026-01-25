@@ -20,6 +20,12 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   onDeleteComposer,
   onBack
 }) => {
+  // NOTE: 安全限制 - 只有本地开发环境（localhost:3000）才允许删除 composer
+  // 防止 Vercel 云端部署被恶意删除数据
+  const isLocalDev = typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+    window.location.port === '3000';
+
   const [viewMode, setViewMode] = useState<ViewMode>('Sheet Music');
   const [isEditing, setIsEditing] = useState(false);
 
@@ -93,6 +99,13 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   };
 
   const confirmDeleteComposer = async () => {
+    // NOTE: 双重安全检查 - 防止云端环境触发删除
+    if (!isLocalDev) {
+      console.warn('Delete operation is only allowed in local development environment');
+      setShowDeleteConfirm(false);
+      return;
+    }
+
     try {
       await api.deleteComposer(composer.id);
       onDeleteComposer(composer.id);
@@ -178,6 +191,11 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   // --- Handlers: Works (Sheet Music) ---
   const handleDeleteWork = async (workId: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    // NOTE: 安全限制 - 只有本地环境才能删除曲谱
+    if (!isLocalDev) {
+      console.warn('Delete operation is only allowed in local development environment');
+      return;
+    }
     if (window.confirm('Are you sure you want to remove this piece?')) {
       try {
         await api.deleteWork(workId);
@@ -278,6 +296,11 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   // --- Handlers: Recordings ---
   const handleDeleteRecording = async (recId: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    // NOTE: 安全限制 - 只有本地环境才能删除录音
+    if (!isLocalDev) {
+      console.warn('Delete operation is only allowed in local development environment');
+      return;
+    }
     if (window.confirm('Are you sure you want to remove this recording?')) {
       try {
         await api.deleteRecording(recId);
@@ -489,7 +512,8 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
                 className={`group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors border-b border-divider last:border-0 relative overflow-hidden ${!isEditing && work.fileUrl ? 'cursor-pointer' : ''
                   }`}
               >
-                {isEditing ? (
+                {/* NOTE: 删除按钮只在本地环境的编辑模式下显示 */}
+                {isEditing && isLocalDev ? (
                   <button
                     onClick={(e) => handleDeleteWork(work.id, e)}
                     className="shrink-0 text-red-500 hover:bg-red-50 p-2 rounded-full -ml-2 transition-colors"
@@ -547,8 +571,8 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
                 className={`group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors border-b border-divider last:border-0 relative ${!isEditing && recording.fileUrl ? 'cursor-pointer' : ''
                   }`}
               >
-                {/* Left Icon: Trash or Play */}
-                {isEditing ? (
+                {/* NOTE: 删除按钮只在本地环境的编辑模式下显示 */}
+                {isEditing && isLocalDev ? (
                   <button
                     onClick={(e) => handleDeleteRecording(recording.id, e)}
                     className="shrink-0 text-red-500 hover:bg-red-50 p-2 rounded-full -ml-2 transition-colors"
@@ -597,8 +621,8 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
 
       </div>
 
-      {/* Delete Composer Button (Edit Mode Only) */}
-      {isEditing && (
+      {/* Delete Composer Button (Edit Mode Only, Local Dev Only) */}
+      {isEditing && isLocalDev && (
         <div className="px-6 py-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <button
             onClick={() => setShowDeleteConfirm(true)}
