@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, deleteAvatar, deleteSheetMusic, deleteRecordingFile } from './supabase';
 import { Composer, Work, Recording } from './types';
 
 // 我们不再需要 backend/main.py 或 localhost:8000
@@ -14,7 +14,7 @@ export const api = {
 
         if (error) throw error;
 
-        // 获取所有作曲家的作品和录音数量
+        // 获取所有作曲家的作品 and 录音数量
         const composerIds = (data || []).map(c => c.id);
 
         // 批量查询作品数量
@@ -120,6 +120,31 @@ export const api = {
     },
 
     deleteComposer: async (id: string): Promise<void> => {
+        // 1. 获取所有关联内容以删除文件
+        const { data: composer } = await supabase.from('composers').select('image').eq('id', id).single();
+        const { data: works } = await supabase.from('works').select('file_url').eq('composer_id', id);
+        const { data: recordings } = await supabase.from('recordings').select('file_url').eq('composer_id', id);
+
+        // 2. 删除作品文件
+        if (works) {
+            for (const work of works) {
+                if (work.file_url) await deleteSheetMusic(work.file_url);
+            }
+        }
+
+        // 3. 删除录音文件
+        if (recordings) {
+            for (const rec of recordings) {
+                if (rec.file_url) await deleteRecordingFile(rec.file_url);
+            }
+        }
+
+        // 4. 删除头像
+        if (composer?.image) {
+            await deleteAvatar(composer.image);
+        }
+
+        // 5. 删除数据库记录 (级联删除会自动处理 works 和 recordings 的 DB 记录)
         const { error } = await supabase
             .from('composers')
             .delete()
@@ -171,6 +196,13 @@ export const api = {
     },
 
     deleteWork: async (id: string): Promise<void> => {
+        // 1. 获取并删除文件
+        const { data } = await supabase.from('works').select('file_url').eq('id', id).single();
+        if (data?.file_url) {
+            await deleteSheetMusic(data.file_url);
+        }
+
+        // 2. 删除 DB 记录
         const { error } = await supabase
             .from('works')
             .delete()
@@ -236,6 +268,13 @@ export const api = {
     },
 
     deleteRecording: async (id: string): Promise<void> => {
+        // 1. 获取并删除文件
+        const { data } = await supabase.from('recordings').select('file_url').eq('id', id).single();
+        if (data?.file_url) {
+            await deleteRecordingFile(data.file_url);
+        }
+
+        // 2. 删除 DB 记录
         const { error } = await supabase
             .from('recordings')
             .delete()
@@ -256,4 +295,17 @@ export const api = {
         // 返回统一格式，将 file_url 转换为 fileUrl 以匹配前端类型
         return { ...data, fileUrl: data.file_url };
     },
+
+    // --- Auth (认证) ---
+    getCurrentUser: async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        return user;
+    },
+
+    getCurrentProfile: async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        return data;
+    }
 };

@@ -8,6 +8,7 @@ create table if not exists profiles (
   id uuid references auth.users(id) on delete cascade primary key,
   nickname text not null,
   avatar_url text,
+  role text not null default 'user' check (role in ('admin', 'user')),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -34,11 +35,12 @@ create policy "Users can insert own profile"
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, nickname, avatar_url)
+  insert into public.profiles (id, nickname, avatar_url, role)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'nickname', 'User'),
-    null
+    null,
+    'user'
   );
   return new;
 end;
