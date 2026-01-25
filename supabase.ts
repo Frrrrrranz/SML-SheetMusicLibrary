@@ -185,6 +185,7 @@ export const signUp = async (email: string, password: string, nickname: string) 
             data: {
                 nickname, // 存储在 user_metadata 中，触发器会用它创建 profile
             },
+            emailRedirectTo: window.location.origin,
         },
     });
 
