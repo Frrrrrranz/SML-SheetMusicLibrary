@@ -33,6 +33,15 @@ export interface Composer {
 
 export type ViewMode = 'Sheet Music' | 'Recordings';
 
+// 用户信息类型
+export interface Profile {
+  id: string;
+  nickname: string;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface NavItem {
   id: string;
   label: string;

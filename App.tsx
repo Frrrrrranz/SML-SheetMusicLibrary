@@ -7,9 +7,12 @@ import { ComposersScreen } from './screens/ComposersScreen';
 import { ComposerDetailScreen } from './screens/ComposerDetailScreen';
 import { SearchScreen } from './screens/SearchScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { AuthScreen } from './screens/AuthScreen';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Composer } from './types';
 
 
+// 主应用内容（需要登录）
 const AppContent: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -137,12 +140,39 @@ const DetailWrapper = ({
   );
 };
 
+// 认证路由守卫
+const AuthGuard: React.FC = () => {
+  const { session, loading } = useAuth();
+
+  // 加载中显示 loading 状态
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-oldGold border-t-transparent rounded-full animate-spin" />
+          <p className="text-textSub">加载中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 未登录显示登录页
+  if (!session) {
+    return <AuthScreen />;
+  }
+
+  // 已登录显示主应用
+  return <AppContent />;
+};
+
 const App: React.FC = () => {
   return (
     <>
-      <HashRouter>
-        <AppContent />
-      </HashRouter>
+      <AuthProvider>
+        <HashRouter>
+          <AuthGuard />
+        </HashRouter>
+      </AuthProvider>
       <Analytics />
     </>
   );
