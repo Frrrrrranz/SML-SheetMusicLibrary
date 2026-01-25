@@ -111,3 +111,56 @@ export const deleteAvatar = async (imageUrl: string): Promise<void> => {
         console.error('Failed to delete avatar:', error.message);
     }
 };
+
+/**
+ * 上传录音文件到 Supabase Storage
+ * @param file 要上传的音频文件
+ * @param recordingId 录音记录 ID（用于生成唯一文件名）
+ * @returns 文件的公开 URL
+ */
+export const uploadRecordingFile = async (file: File, recordingId: string): Promise<string> => {
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'mp3';
+    const fileName = `${recordingId}.${fileExt}`;
+    const filePath = `audio/${fileName}`;
+
+    const { error } = await supabase.storage
+        .from('recordings')
+        .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: true, // 覆盖同名文件
+        });
+
+    if (error) {
+        console.error('录音上传失败:', error.message);
+        throw new Error(`Failed to upload recording: ${error.message}`);
+    }
+
+    // 获取公开 URL
+    const { data: urlData } = supabase.storage
+        .from('recordings')
+        .getPublicUrl(filePath);
+
+    return urlData.publicUrl;
+};
+
+/**
+ * 删除录音文件
+ * @param fileUrl 录音文件 URL
+ */
+export const deleteRecordingFile = async (fileUrl: string): Promise<void> => {
+    // 只删除存储在 recordings bucket 中的文件，跳过外部 URL
+    if (!fileUrl.includes('/recordings/')) return;
+
+    const urlParts = fileUrl.split('/recordings/');
+    if (urlParts.length < 2) return;
+
+    const filePath = urlParts[1];
+
+    const { error } = await supabase.storage
+        .from('recordings')
+        .remove([filePath]);
+
+    if (error) {
+        console.error('Failed to delete recording file:', error.message);
+    }
+};

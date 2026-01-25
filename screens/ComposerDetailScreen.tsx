@@ -3,7 +3,7 @@ import { ChevronLeft, Plus, Camera, FileText, Music, Check, Trash2, Edit2, PlayC
 import { ViewMode, Composer, Work, Recording } from '../types';
 import { Modal } from '../components/Modal';
 import { api } from '../api';
-import { uploadSheetMusic, uploadAvatar, deleteAvatar } from '../supabase';
+import { uploadSheetMusic, uploadAvatar, deleteAvatar, uploadRecordingFile } from '../supabase';
 
 interface ComposerDetailScreenProps {
   composerId: string;
@@ -49,6 +49,9 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   const [recFormPerformer, setRecFormPerformer] = useState('');
   const [recFormYear, setRecFormYear] = useState('');
   const [recFormDuration, setRecFormDuration] = useState('');
+  const [recFormFile, setRecFormFile] = useState<File | null>(null);
+  const [isRecUploading, setIsRecUploading] = useState(false);
+  const recFileInputRef = useRef<HTMLInputElement>(null);
 
   const composer = composers.find(c => c.id === composerId);
 
@@ -295,6 +298,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
     setRecFormPerformer('');
     setRecFormYear('');
     setRecFormDuration('');
+    setRecFormFile(null);
     setShowRecordingModal(true);
   };
 
@@ -311,9 +315,10 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   const handleSaveRecording = async () => {
     if (!recFormTitle) return;
 
+    setIsRecUploading(true);
     try {
       if (editingRecordingId) {
-        // Update
+        // Update existing recording
         const updatedRecording = await api.updateRecording(editingRecordingId, {
           title: recFormTitle,
           performer: recFormPerformer,
@@ -321,12 +326,19 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
           duration: recFormDuration || '0:00'
         });
 
+        // 如果选择了新文件，上传并更新
+        if (recFormFile) {
+          const fileUrl = await uploadRecordingFile(recFormFile, editingRecordingId);
+          const recWithFile = await api.uploadRecordingFileUrl(editingRecordingId, fileUrl);
+          updatedRecording.fileUrl = recWithFile.fileUrl;
+        }
+
         const updatedRecordings = composer.recordings.map(r =>
           r.id === editingRecordingId ? updatedRecording : r
         );
         onUpdateComposer({ ...composer, recordings: updatedRecordings });
       } else {
-        // Create
+        // Create new recording
         const newRecPayload = {
           composer_id: composer.id,
           title: recFormTitle,
@@ -336,15 +348,33 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
         };
         const newRec = await api.createRecording(newRecPayload);
 
+        // 如果选择了文件，上传并更新
+        if (recFormFile) {
+          const fileUrl = await uploadRecordingFile(recFormFile, newRec.id);
+          const recWithFile = await api.uploadRecordingFileUrl(newRec.id, fileUrl);
+          newRec.fileUrl = recWithFile.fileUrl;
+        }
+
         const updatedRecordings = [newRec, ...(composer.recordings || [])];
         onUpdateComposer({
           ...composer,
           recordings: updatedRecordings
         });
       }
+
+      // Reset and Close
+      setEditingRecordingId(null);
+      setRecFormTitle('');
+      setRecFormPerformer('');
+      setRecFormYear('');
+      setRecFormDuration('');
+      setRecFormFile(null);
       setShowRecordingModal(false);
     } catch (error) {
       console.error('Failed to save recording:', error);
+      alert('保存失败，请检查文件格式或网络连接');
+    } finally {
+      setIsRecUploading(false);
     }
   };
 
@@ -508,7 +538,14 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
             {composer.recordings && composer.recordings.map((recording) => (
               <div
                 key={recording.id}
-                className="group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors cursor-pointer border-b border-divider last:border-0 relative"
+                onClick={() => {
+                  // NOTE: 非编辑模式下，点击条目播放音频
+                  if (!isEditing && recording.fileUrl) {
+                    window.open(recording.fileUrl, '_blank');
+                  }
+                }}
+                className={`group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors border-b border-divider last:border-0 relative ${!isEditing && recording.fileUrl ? 'cursor-pointer' : ''
+                  }`}
               >
                 {/* Left Icon: Trash or Play */}
                 {isEditing ? (
@@ -519,7 +556,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
                     <Trash2 size={20} />
                   </button>
                 ) : (
-                  <div className="shrink-0 text-oldGold opacity-80 group-hover:opacity-100 transition-opacity">
+                  <div className={`shrink-0 opacity-80 group-hover:opacity-100 transition-opacity ${recording.fileUrl ? 'text-oldGold' : 'text-gray-400'}`}>
                     <PlayCircle size={28} strokeWidth={1.5} />
                   </div>
                 )}
@@ -741,15 +778,44 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
         title={editingRecordingId ? "Edit Recording" : "Add Recording"}
       >
         <div className="px-6 pt-6 pb-32">
-          {/* File placeholder for new recordings */}
-          {!editingRecordingId && (
-            <div className="mb-8 flex justify-center">
-              <div className="flex aspect-square size-32 flex-col items-center justify-center rounded-2xl bg-oldGold/5 border-2 border-dashed border-oldGold/30 text-oldGold">
-                <Music size={40} className="mb-2 opacity-50" />
-                <span className="text-sm font-semibold">Upload Audio</span>
-              </div>
+          {/* Audio Upload Section */}
+          <section className="mb-8">
+            <input
+              type="file"
+              ref={recFileInputRef}
+              accept="audio/*,.mp3,.wav,.flac,.m4a,.aac"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) setRecFormFile(file);
+              }}
+            />
+            <div
+              onClick={() => recFileInputRef.current?.click()}
+              className={`
+                flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed cursor-pointer transition-all
+                ${recFormFile ? 'border-oldGold bg-oldGold/5' : 'border-gray-300 hover:border-oldGold/50'}
+              `}
+            >
+              {recFormFile ? (
+                <>
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-oldGold/10 text-oldGold mb-3">
+                    <Check size={28} />
+                  </div>
+                  <p className="text-textMain font-semibold text-center">{recFormFile.name}</p>
+                  <p className="text-textSub text-sm mt-1">点击更换文件</p>
+                </>
+              ) : (
+                <>
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-400 mb-3">
+                    <Music size={28} />
+                  </div>
+                  <p className="text-textMain font-semibold">选择音频文件</p>
+                  <p className="text-textSub text-sm mt-1">支持 MP3、WAV、FLAC 等格式</p>
+                </>
+              )}
             </div>
-          )}
+          </section>
 
           <div className="flex flex-col gap-6 font-sans">
             <div className="group relative">
@@ -799,13 +865,20 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
           <div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-background via-background/95 to-transparent px-6 pb-8 pt-12 z-20">
             <button
               onClick={handleSaveRecording}
-              disabled={!recFormTitle}
+              disabled={!recFormTitle || isRecUploading}
               className={`
                     flex w-full items-center justify-center gap-2 rounded-full py-4 text-lg font-bold text-white shadow-lg transition-transform active:scale-[0.98]
-                    ${recFormTitle ? 'bg-oldGold shadow-oldGold/30 hover:bg-[#d4ac26]' : 'bg-gray-300 cursor-not-allowed'}
+                    ${recFormTitle && !isRecUploading ? 'bg-oldGold shadow-oldGold/30 hover:bg-[#d4ac26]' : 'bg-gray-300 cursor-not-allowed'}
                 `}
             >
-              {editingRecordingId ? "Save Changes" : "Save to Library"}
+              {isRecUploading ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  上传中...
+                </>
+              ) : (
+                editingRecordingId ? "保存更改" : "保存到曲库"
+              )}
             </button>
           </div>
         </div>

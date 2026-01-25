@@ -16,6 +16,7 @@ export interface Recording {
   performer: string;
   duration: string;
   year: string;
+  fileUrl?: string; // 音频文件 URL
 }
 
 export interface Composer {

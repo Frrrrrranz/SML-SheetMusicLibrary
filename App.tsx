@@ -17,9 +17,12 @@ const AppContent: React.FC = () => {
   // Lifted state for composers
   const [composers, setComposers] = useState<Composer[]>([]);
 
+  // NOTE: 当路由变化到主页时重新加载数据，确保统计数量正确
   useEffect(() => {
-    loadComposers();
-  }, []);
+    if (location.pathname === '/') {
+      loadComposers();
+    }
+  }, [location.pathname]);
 
   const loadComposers = async () => {
     try {

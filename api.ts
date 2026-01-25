@@ -84,7 +84,10 @@ export const api = {
                 ...w,
                 fileUrl: w.file_url  // NOTE: 数据库使用 snake_case，前端使用 camelCase
             })),
-            recordings: recordings || []
+            recordings: (recordings || []).map((r: any) => ({
+                ...r,
+                fileUrl: r.file_url  // NOTE: 数据库使用 snake_case，前端使用 camelCase
+            }))
         };
     },
 
@@ -196,7 +199,8 @@ export const api = {
             title: recording.title,
             performer: recording.performer,
             duration: recording.duration,
-            year: recording.year
+            year: recording.year,
+            file_url: recording.fileUrl || recording.file_url // 兼容两种写法
         };
 
         const { data, error } = await supabase
@@ -206,12 +210,18 @@ export const api = {
             .single();
 
         if (error) throw error;
-        return data;
+        // NOTE: 转换 file_url 为 fileUrl 以匹配前端类型
+        return { ...data, fileUrl: data.file_url };
     },
 
     updateRecording: async (id: string, recording: any): Promise<Recording> => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id: _, created_at, composer_id, ...updates } = recording;
+        const { id: _, created_at, composer_id, fileUrl, ...updates } = recording;
+
+        // 如果有 fileUrl，转换为 file_url
+        if (fileUrl) {
+            updates.file_url = fileUrl;
+        }
 
         const { data, error } = await supabase
             .from('recordings')
@@ -221,7 +231,8 @@ export const api = {
             .single();
 
         if (error) throw error;
-        return data;
+        // NOTE: 转换 file_url 为 fileUrl 以匹配前端类型
+        return { ...data, fileUrl: data.file_url };
     },
 
     deleteRecording: async (id: string): Promise<void> => {
@@ -230,5 +241,19 @@ export const api = {
             .delete()
             .eq('id', id);
         if (error) throw error;
+    },
+
+    // 上传后更新录音的 file_url 字段
+    uploadRecordingFileUrl: async (recordingId: string, fileUrl: string): Promise<any> => {
+        const { data, error } = await supabase
+            .from('recordings')
+            .update({ file_url: fileUrl })
+            .eq('id', recordingId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        // 返回统一格式，将 file_url 转换为 fileUrl 以匹配前端类型
+        return { ...data, fileUrl: data.file_url };
     },
 };
