@@ -14,6 +14,16 @@ export const AuthScreen: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showVerificationMessage, setShowVerificationMessage] = useState(false);
+    const [isFirstVisit, setIsFirstVisit] = useState(false);
+
+    // 检查是否是首次访问
+    React.useEffect(() => {
+        const visited = localStorage.getItem('sml_has_visited');
+        if (!visited) {
+            setIsFirstVisit(true);
+            localStorage.setItem('sml_has_visited', 'true');
+        }
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -116,7 +126,10 @@ export const AuthScreen: React.FC = () => {
                 {/* Form Card */}
                 <div className="w-full max-w-sm">
                     <h2 className="text-2xl font-bold font-serif text-textMain mb-8 text-center">
-                        {mode === 'login' ? '欢迎回来' : '创建账号'}
+                        {mode === 'login'
+                            ? (isFirstVisit ? '欢迎使用 SML' : '欢迎回来')
+                            : '加入 SML'
+                        }
                     </h2>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
