@@ -17,6 +17,9 @@ create table if not exists works (
   edition text,
   year text,
   file_url text,
+  source_url text,
+  source_credit text,
+  license text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

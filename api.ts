@@ -162,7 +162,10 @@ export const api = {
             title: work.title,
             edition: work.edition,
             year: work.year,
-            file_url: work.fileUrl || work.file_url // 兼容两种写法
+            file_url: work.fileUrl || work.file_url, // 兼容两种写法
+            // source_url: work.sourceUrl, // Reverted
+            // source_credit: work.sourceCredit, // Reverted
+            // license: work.license // Reverted
         };
 
         const { data, error } = await supabase
@@ -182,6 +185,7 @@ export const api = {
         if (work.edition) payload.edition = work.edition;
         if (work.year) payload.year = work.year;
         if (work.fileUrl) payload.file_url = work.fileUrl;
+        if (work.license !== undefined) payload.license = work.license;
 
         const { data, error } = await supabase
             .from('works')
