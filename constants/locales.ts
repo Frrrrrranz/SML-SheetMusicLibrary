@@ -1,0 +1,71 @@
+export const translations = {
+    zh: {
+        auth: {
+            welcome: '欢迎使用 SML',
+            welcomeBack: '欢迎回来',
+            join: '加入 SML',
+            nickname: '昵称',
+            email: '邮箱',
+            password: '密码',
+            login: '登录',
+            register: '注册',
+            processing: '处理中...',
+            noAccount: '还没有账号？',
+            hasAccount: '已有账号？',
+            registerNow: '立即注册',
+            backToLogin: '返回登录',
+            verifySentTitle: '验证邮件已发送',
+            verifySentDesc: '我们已向 {email} 发送了一封验证邮件。',
+            verifySentAction: '请点击邮件中的链接完成注册。',
+            errors: {
+                nicknameRequired: '请输入昵称',
+                invalidCredentials: '邮箱或密码错误',
+                emailNotConfirmed: '请先验证您的邮箱',
+                userAlreadyRegistered: '该邮箱已注册',
+                passwordTooShort: '密码至少需要 6 个字符',
+                genericError: '操作失败，请重试',
+            },
+        },
+        common: {
+            language: '语言',
+            english: 'English',
+            chinese: '中文',
+        },
+    },
+    en: {
+        auth: {
+            welcome: 'Welcome to SML',
+            welcomeBack: 'Welcome back',
+            join: 'Join SML',
+            nickname: 'Nickname',
+            email: 'Email',
+            password: 'Password',
+            login: 'Login',
+            register: 'Register',
+            processing: 'Processing...',
+            noAccount: "Don't have an account?",
+            hasAccount: 'Already have an account?',
+            registerNow: 'Register Now',
+            backToLogin: 'Back to Login',
+            verifySentTitle: 'Verification Email Sent',
+            verifySentDesc: 'We have sent a verification email to {email}.',
+            verifySentAction: 'Please click the link in the email to complete registration.',
+            errors: {
+                nicknameRequired: 'Please enter a nickname',
+                invalidCredentials: 'Invalid email or password',
+                emailNotConfirmed: 'Please verify your email first',
+                userAlreadyRegistered: 'This email is already registered',
+                passwordTooShort: 'Password should be at least 6 characters',
+                genericError: 'Operation failed, please try again',
+            },
+        },
+        common: {
+            language: 'Language',
+            english: 'English',
+            chinese: 'Chinese',
+        },
+    },
+};
+
+export type Language = 'zh' | 'en';
+export type TranslationKey = typeof translations.zh;

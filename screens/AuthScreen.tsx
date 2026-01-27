@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, ArrowRight, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Loader2, CheckCircle, AlertCircle, Languages } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 type AuthMode = 'login' | 'register';
 
 export const AuthScreen: React.FC = () => {
     const { signIn, signUp } = useAuth();
+    const { t, language, setLanguage } = useLanguage();
 
     const [mode, setMode] = useState<AuthMode>('login');
     const [email, setEmail] = useState('');
@@ -37,7 +39,7 @@ export const AuthScreen: React.FC = () => {
             } else {
                 // 注册
                 if (!nickname.trim()) {
-                    setError('请输入昵称');
+                    setError(t.auth.errors.nicknameRequired);
                     setLoading(false);
                     return;
                 }
@@ -53,15 +55,15 @@ export const AuthScreen: React.FC = () => {
             console.error('Auth error:', err);
             // 处理常见错误信息
             if (err.message?.includes('Invalid login credentials')) {
-                setError('邮箱或密码错误');
+                setError(t.auth.errors.invalidCredentials);
             } else if (err.message?.includes('Email not confirmed')) {
-                setError('请先验证您的邮箱');
+                setError(t.auth.errors.emailNotConfirmed);
             } else if (err.message?.includes('User already registered')) {
-                setError('该邮箱已注册');
+                setError(t.auth.errors.userAlreadyRegistered);
             } else if (err.message?.includes('Password should be at least')) {
-                setError('密码至少需要 6 个字符');
+                setError(t.auth.errors.passwordTooShort);
             } else {
-                setError(err.message || '操作失败，请重试');
+                setError(err.message || t.auth.errors.genericError);
             }
         } finally {
             setLoading(false);
@@ -86,13 +88,13 @@ export const AuthScreen: React.FC = () => {
                     </div>
 
                     <h1 className="text-2xl font-bold font-serif text-textMain mb-3">
-                        验证邮件已发送
+                        {t.auth.verifySentTitle}
                     </h1>
 
                     <p className="text-textSub mb-8 leading-relaxed">
-                        我们已向 <span className="font-semibold text-textMain">{email}</span> 发送了一封验证邮件。
+                        {t.auth.verifySentDesc.replace('{email}', email)}
                         <br />
-                        请点击邮件中的链接完成注册。
+                        {t.auth.verifySentAction}
                     </p>
 
                     <button
@@ -102,7 +104,7 @@ export const AuthScreen: React.FC = () => {
                         }}
                         className="text-oldGold font-semibold hover:underline"
                     >
-                        返回登录
+                        {t.auth.backToLogin}
                     </button>
                 </div>
             </div>
@@ -127,8 +129,8 @@ export const AuthScreen: React.FC = () => {
                 <div className="w-full max-w-sm">
                     <h2 className="text-2xl font-bold font-serif text-textMain mb-8 text-center">
                         {mode === 'login'
-                            ? (isFirstVisit ? '欢迎使用 SML' : '欢迎回来')
-                            : '加入 SML'
+                            ? (isFirstVisit ? t.auth.welcome : t.auth.welcomeBack)
+                            : t.auth.join
                         }
                     </h2>
 
@@ -143,7 +145,7 @@ export const AuthScreen: React.FC = () => {
                                     type="text"
                                     value={nickname}
                                     onChange={(e) => setNickname(e.target.value)}
-                                    placeholder="昵称"
+                                    placeholder={t.auth.nickname}
                                     className="w-full pl-8 pr-4 py-3 border-b-2 border-gray-200 bg-transparent text-textMain placeholder-gray-400 focus:border-oldGold focus:outline-none transition-colors text-lg"
                                     autoComplete="name"
                                 />
@@ -159,7 +161,7 @@ export const AuthScreen: React.FC = () => {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="邮箱"
+                                placeholder={t.auth.email}
                                 className="w-full pl-8 pr-4 py-3 border-b-2 border-gray-200 bg-transparent text-textMain placeholder-gray-400 focus:border-oldGold focus:outline-none transition-colors text-lg"
                                 autoComplete="email"
                                 required
@@ -175,7 +177,7 @@ export const AuthScreen: React.FC = () => {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="密码"
+                                placeholder={t.auth.password}
                                 className="w-full pl-8 pr-4 py-3 border-b-2 border-gray-200 bg-transparent text-textMain placeholder-gray-400 focus:border-oldGold focus:outline-none transition-colors text-lg"
                                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                                 required
@@ -205,27 +207,49 @@ export const AuthScreen: React.FC = () => {
                             {loading ? (
                                 <>
                                     <Loader2 size={20} className="animate-spin" />
-                                    处理中...
+                                    {t.auth.processing}
                                 </>
                             ) : (
                                 <>
-                                    {mode === 'login' ? '登录' : '注册'}
+                                    {mode === 'login' ? t.auth.login : t.auth.register}
                                     <ArrowRight size={20} />
                                 </>
                             )}
                         </button>
                     </form>
 
-                    {/* Switch Mode */}
-                    <div className="mt-8 text-center">
+                    <div className="mt-8 text-center text-sm">
                         <span className="text-textSub">
-                            {mode === 'login' ? '还没有账号？' : '已有账号？'}
+                            {mode === 'login' ? t.auth.noAccount : t.auth.hasAccount}
                         </span>
                         <button
                             onClick={switchMode}
                             className="ml-2 text-oldGold font-semibold hover:underline"
                         >
-                            {mode === 'login' ? '立即注册' : '返回登录'}
+                            {mode === 'login' ? t.auth.registerNow : t.auth.backToLogin}
+                        </button>
+                    </div>
+
+                    {/* Language Switcher */}
+                    <div className="mt-10 flex justify-center gap-4">
+                        <button
+                            onClick={() => setLanguage('zh')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${language === 'zh'
+                                ? 'bg-oldGold/10 text-oldGold border border-oldGold/20'
+                                : 'text-textSub hover:text-textMain'
+                                }`}
+                        >
+                            中文
+                        </button>
+                        <div className="w-px h-3 bg-gray-200 self-center" />
+                        <button
+                            onClick={() => setLanguage('en')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${language === 'en'
+                                ? 'bg-oldGold/10 text-oldGold border border-oldGold/20'
+                                : 'text-textSub hover:text-textMain'
+                                }`}
+                        >
+                            English
                         </button>
                     </div>
                 </div>
