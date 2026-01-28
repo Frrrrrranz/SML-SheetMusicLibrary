@@ -37,7 +37,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   const [showPortraitModal, setShowPortraitModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showCopyrightModal, setShowCopyrightModal] = useState(false);
-  const [pendingPdfUrl, setPendingPdfUrl] = useState<string | null>(null);
+  const [pendingFileUrl, setPendingFileUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<'pdf' | 'audio'>('pdf');
 
   // Work Form States
@@ -514,7 +514,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
                       if (isAdmin) {
                         window.open(work.fileUrl, '_blank');
                       } else {
-                        setPendingPdfUrl(work.fileUrl);
+                        setPendingFileUrl(work.fileUrl);
                         setShowCopyrightModal(true);
                       }
                     }
@@ -575,7 +575,12 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
                   onClick={() => {
                     // NOTE: 非编辑模式下，点击条目播放音频
                     if (!isEditing && recording.fileUrl) {
-                      window.open(recording.fileUrl, '_blank');
+                      if (isAdmin) {
+                        window.open(recording.fileUrl, '_blank');
+                      } else {
+                        setPendingFileUrl(recording.fileUrl);
+                        setShowCopyrightModal(true);
+                      }
                     }
                   }}
                   className={`group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors border-b border-divider last:border-0 relative ${!isEditing && recording.fileUrl ? 'cursor-pointer' : ''
@@ -714,10 +719,10 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
           <div className="flex flex-col w-full gap-3">
             <button
               onClick={() => {
-                if (pendingPdfUrl) {
-                  window.open(pendingPdfUrl, '_blank');
+                if (pendingFileUrl) {
+                  window.open(pendingFileUrl, '_blank');
                   setShowCopyrightModal(false);
-                  setPendingPdfUrl(null);
+                  setPendingFileUrl(null);
                 }
               }}
               className="w-full py-4 rounded-full font-bold text-white bg-oldGold hover:bg-[#d4ac26] transition-colors shadow-lg shadow-oldGold/20"
@@ -727,7 +732,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
             <button
               onClick={() => {
                 setShowCopyrightModal(false);
-                setPendingPdfUrl(null);
+                setPendingFileUrl(null);
               }}
               className="w-full py-4 rounded-full font-bold text-textSub hover:bg-gray-100 transition-colors"
             >
