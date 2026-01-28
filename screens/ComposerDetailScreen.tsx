@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, Plus, Camera, FileText, Music, Check, Trash2, Edit2, PlayCircle, AlertCircle, Upload, Loader2 } from 'lucide-react';
 import { ViewMode, Composer, Work, Recording } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Modal } from '../components/Modal';
 import { api } from '../api';
 import { uploadSheetMusic, uploadAvatar, deleteAvatar, uploadRecordingFile } from '../supabase';
@@ -22,6 +23,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   onBack
 }) => {
   const { user: authUser, profile: authProfile } = useAuth();
+  const { t } = useLanguage();
 
   // 管理员权限判断：基于角色
   const isAdmin = authProfile?.role === 'admin';
@@ -34,6 +36,8 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   const [showRecordingModal, setShowRecordingModal] = useState(false);
   const [showPortraitModal, setShowPortraitModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showCopyrightModal, setShowCopyrightModal] = useState(false);
+  const [pendingPdfUrl, setPendingPdfUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<'pdf' | 'audio'>('pdf');
 
   // Work Form States
@@ -507,7 +511,12 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
                   onClick={() => {
                     // NOTE: 非编辑模式下，点击条目打开 PDF 查看
                     if (!isEditing && work.fileUrl) {
-                      window.open(work.fileUrl, '_blank');
+                      if (isAdmin) {
+                        window.open(work.fileUrl, '_blank');
+                      } else {
+                        setPendingPdfUrl(work.fileUrl);
+                        setShowCopyrightModal(true);
+                      }
                     }
                   }}
                   className={`group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors border-b border-divider last:border-0 relative overflow-hidden ${!isEditing && work.fileUrl ? 'cursor-pointer' : ''
@@ -678,6 +687,51 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
               className="flex-1 py-3.5 rounded-full font-bold text-white bg-red-500 hover:bg-red-600 transition-colors shadow-lg shadow-red-500/30"
             >
               Delete
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Copyright Disclaimer Modal */}
+      <Modal
+        isOpen={showCopyrightModal}
+        onClose={() => setShowCopyrightModal(false)}
+        variant="center"
+      >
+        <div className="flex flex-col items-center text-center font-sans px-2">
+          <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-oldGold/10 text-oldGold">
+            <AlertCircle size={32} strokeWidth={1.5} />
+          </div>
+          <h3 className="text-xl font-bold text-textMain mb-4 font-serif">
+            {t.common.copyright.title}
+          </h3>
+          <div className="space-y-4 text-textSub text-[15px] leading-relaxed mb-8">
+            <p>{t.common.copyright.notice}</p>
+            <p className="font-semibold text-textMain">
+              {t.common.copyright.warning}
+            </p>
+          </div>
+          <div className="flex flex-col w-full gap-3">
+            <button
+              onClick={() => {
+                if (pendingPdfUrl) {
+                  window.open(pendingPdfUrl, '_blank');
+                  setShowCopyrightModal(false);
+                  setPendingPdfUrl(null);
+                }
+              }}
+              className="w-full py-4 rounded-full font-bold text-white bg-oldGold hover:bg-[#d4ac26] transition-colors shadow-lg shadow-oldGold/20"
+            >
+              {t.common.copyright.agree}
+            </button>
+            <button
+              onClick={() => {
+                setShowCopyrightModal(false);
+                setPendingPdfUrl(null);
+              }}
+              className="w-full py-4 rounded-full font-bold text-textSub hover:bg-gray-100 transition-colors"
+            >
+              {t.common.copyright.cancel}
             </button>
           </div>
         </div>

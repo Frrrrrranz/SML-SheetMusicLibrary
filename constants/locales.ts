@@ -30,6 +30,13 @@ export const translations = {
             language: '语言',
             english: 'English',
             chinese: '中文',
+            copyright: {
+                title: '版权声明',
+                notice: '本站乐谱由用户上传，仅供个人学习、练习与研究使用。禁止任何形式的商业用途或非法传播。',
+                warning: '继续浏览即表示您同意遵守相关法律法规并自行承担相关风险。',
+                agree: '我已阅读并同意',
+                cancel: '取消',
+            },
         },
     },
     en: {
@@ -63,6 +70,13 @@ export const translations = {
             language: 'Language',
             english: 'English',
             chinese: 'Chinese',
+            copyright: {
+                title: 'Copyright Disclaimer',
+                notice: 'The sheet music on this site is uploaded by users and is intended for personal study, practice, and research only. Any form of commercial use or illegal distribution is strictly prohibited.',
+                warning: 'By continuing, you agree to comply with relevant laws and regulations and assume all associated risks.',
+                agree: 'I Read and Agree',
+                cancel: 'Cancel',
+            },
         },
     },
 };
