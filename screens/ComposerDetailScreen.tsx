@@ -43,6 +43,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   const [workFormEdition, setWorkFormEdition] = useState('');
   const [workFormFile, setWorkFormFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Avatar Upload States
@@ -507,7 +508,13 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
                   onClick={() => {
                     // NOTE: 非编辑模式下，点击条目打开 PDF 查看
                     if (!isEditing && work.fileUrl) {
-                      window.open(work.fileUrl, '_blank');
+                      if (isAdmin) {
+                        // 管理员可以直接打开新标签页（支持下载）
+                        window.open(work.fileUrl, '_blank');
+                      } else {
+                        // 普通用户使用应用内预览（限制直接下载）
+                        setPreviewUrl(work.fileUrl);
+                      }
                     }
                   }}
                   className={`group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors border-b border-divider last:border-0 relative overflow-hidden ${!isEditing && work.fileUrl ? 'cursor-pointer' : ''
@@ -799,6 +806,37 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
                 editingWorkId ? "保存更改" : "保存到曲库"
               )}
             </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* PDF Preview Modal for Regular Users */}
+      <Modal
+        isOpen={!!previewUrl}
+        onClose={() => setPreviewUrl(null)}
+        variant="bottom"
+        title="在线预览"
+      >
+        <div className="flex flex-col h-full bg-gray-100 overflow-hidden">
+          {previewUrl && (
+            <div className="flex-1 relative">
+              <iframe
+                src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                className="w-full h-full border-0"
+                title="PDF Preview"
+                onContextMenu={(e) => e.preventDefault()}
+              />
+              {/* Overlay to catch right clicks if iframe doesn't */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                onContextMenu={(e) => e.preventDefault()}
+              />
+            </div>
+          )}
+          <div className="p-4 bg-white border-t border-gray-100 text-center">
+            <p className="text-xs text-textSub">
+              由于版权限制，普通用户仅支持在线预览。
+            </p>
           </div>
         </div>
       </Modal>
