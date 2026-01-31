@@ -18,7 +18,3 @@ export const INSTRUMENTS = [
 export const GENRES = [
   'Concerto', 'Sonata', 'Symphony', 'Etude', 'Prelude', 'Suite', 'Opera', 'Chamber Music', 'Ballet', 'Oratorio'
 ];
-
-export const REGIONS = [
-  'Germany', 'Austria', 'France', 'Italy', 'Russia', 'Poland', 'United Kingdom', 'United States', 'Spain', 'Hungary'
-];

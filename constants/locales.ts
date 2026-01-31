@@ -38,6 +38,24 @@ export const translations = {
                 cancel: '取消',
             },
         },
+        search: {
+            title: '搜索',
+            placeholder: '搜索作曲家、作品或乐器',
+            categories: {
+                periods: '时期',
+                instruments: '乐器',
+                genres: '体裁',
+                composers: '作曲家',
+            },
+            noComposers: '暂无作曲家',
+            uploadPrompt: '上传作曲家信息以在此显示',
+            topResults: '最佳结果',
+            noResults: '未找到 "{query}" 的结果',
+            type: {
+                composer: '作曲家',
+                work: '作品匹配',
+            }
+        },
     },
     en: {
         auth: {
@@ -77,6 +95,24 @@ export const translations = {
                 agree: 'I Read and Agree',
                 cancel: 'Cancel',
             },
+        },
+        search: {
+            title: 'Search',
+            placeholder: 'Search composers, works, or instruments',
+            categories: {
+                periods: 'Periods',
+                instruments: 'Instruments',
+                genres: 'Genres',
+                composers: 'Composers',
+            },
+            noComposers: 'No Composers Added',
+            uploadPrompt: 'Upload composer info to see them here.',
+            topResults: 'Top Results',
+            noResults: 'No results found for "{query}"',
+            type: {
+                composer: 'Composer',
+                work: 'Work Match',
+            }
         },
     },
 };
