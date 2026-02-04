@@ -10,12 +10,13 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 interface ComposersScreenProps {
   composers: Composer[];
+  isLoading?: boolean;
   onComposerSelect: (id: string) => void;
   onAddComposer: (composer: Composer) => Promise<Composer | null>;
   onUpdateComposer?: (composer: Composer) => void;
 }
 
-export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onComposerSelect, onAddComposer, onUpdateComposer }) => {
+export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, isLoading = false, onComposerSelect, onAddComposer, onUpdateComposer }) => {
   const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState('');
@@ -112,7 +113,11 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
       </header>
 
       <main className="px-4 py-2">
-        {composers.length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center pt-32">
+            <Loader2 className="h-10 w-10 animate-spin text-oldGold" />
+          </div>
+        ) : composers.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}

@@ -20,6 +20,7 @@ const AppContent: React.FC = () => {
 
   // Lifted state for composers
   const [composers, setComposers] = useState<Composer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // NOTE: 当路由变化到主页时重新加载数据，确保统计数量正确
   useEffect(() => {
@@ -29,11 +30,14 @@ const AppContent: React.FC = () => {
   }, [location.pathname]);
 
   const loadComposers = async () => {
+    setIsLoading(true);
     try {
       const data = await api.getComposers();
       setComposers(data);
     } catch (error) {
       console.error('Failed to load composers:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -79,6 +83,7 @@ const AppContent: React.FC = () => {
             element={
               <ComposersScreen
                 composers={composers}
+                isLoading={isLoading}
                 onComposerSelect={(id) => navigate(`/composer/${id}`)}
                 onAddComposer={handleAddComposer}
                 onUpdateComposer={handleUpdateComposer}
