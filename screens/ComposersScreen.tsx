@@ -1,9 +1,11 @@
 import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Plus, Camera, Library, Loader2 } from 'lucide-react';
 import { Composer } from '../types';
 import { Modal } from '../components/Modal';
 import { uploadAvatar } from '../supabase';
 import { api } from '../api';
+import { staggerContainer, listItem, fabAnimation } from '../utils/animations';
 
 interface ComposersScreenProps {
   composers: Composer[];
@@ -109,7 +111,12 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
 
       <main className="px-4 py-2">
         {composers.length === 0 ? (
-          <div className="flex flex-col items-center justify-center pt-32 animate-in fade-in zoom-in-95 duration-500">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="flex flex-col items-center justify-center pt-32"
+          >
             <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-[#EBEAE6] text-oldGold shadow-soft">
               <Library size={48} strokeWidth={1} />
             </div>
@@ -117,51 +124,71 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
             <p className="text-textSub font-sans text-base leading-relaxed text-center max-w-[250px]">
               Tap the <span className="font-bold text-oldGold">+</span> button to add your first composer to the library.
             </p>
-          </div>
+          </motion.div>
         ) : (
-          composers.map((composer) => (
-            <div
-              key={composer.id}
-              onClick={() => onComposerSelect(composer.id)}
-              className="group flex items-center gap-5 p-4 cursor-pointer hover:bg-black/[0.03] transition-colors duration-200 rounded-xl"
-            >
-              {/* Image */}
-              <div className="shrink-0 relative">
-                <div className="bg-[#F0F0EB] aspect-square rounded-full size-16 overflow-hidden shadow-inner ring-1 ring-black/5">
-                  <img
-                    src={composer.image}
-                    alt={composer.name}
-                    className="h-full w-full object-cover grayscale sepia-[.3] contrast-[1.1] opacity-90 mix-blend-multiply"
-                  />
-                </div>
-              </div>
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            <AnimatePresence mode="popLayout">
+              {composers.map((composer) => (
+                <motion.div
+                  key={composer.id}
+                  variants={listItem}
+                  layout
+                  onClick={() => onComposerSelect(composer.id)}
+                  whileHover={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                  whileTap={{ scale: 0.98 }}
+                  className="group flex items-center gap-5 p-4 cursor-pointer rounded-xl"
+                >
+                  {/* Image */}
+                  <div className="shrink-0 relative">
+                    <div className="bg-[#F0F0EB] aspect-square rounded-full size-16 overflow-hidden shadow-inner ring-1 ring-black/5">
+                      <img
+                        src={composer.image}
+                        alt={composer.name}
+                        className="h-full w-full object-cover grayscale sepia-[.3] contrast-[1.1] opacity-90 mix-blend-multiply"
+                      />
+                    </div>
+                  </div>
 
-              {/* Info */}
-              <div className="flex flex-col justify-center flex-1 border-b border-divider pb-4 group-hover:border-transparent transition-colors">
-                <p className="text-textMain text-[19px] font-bold leading-snug tracking-tight font-serif">
-                  {composer.name}
-                </p>
-                <p className="text-textSub text-[13px] font-medium mt-1 font-sans tracking-wide">
-                  {composer.sheetMusicCount || 0} Sheet Music · {composer.recordingCount || 0} Recordings
-                </p>
-              </div>
+                  {/* Info */}
+                  <div className="flex flex-col justify-center flex-1 border-b border-divider pb-4 group-hover:border-transparent transition-colors">
+                    <p className="text-textMain text-[19px] font-bold leading-snug tracking-tight font-serif">
+                      {composer.name}
+                    </p>
+                    <p className="text-textSub text-[13px] font-medium mt-1 font-sans tracking-wide">
+                      {composer.sheetMusicCount || 0} Sheet Music · {composer.recordingCount || 0} Recordings
+                    </p>
+                  </div>
 
-              {/* Arrow */}
-              <div className="shrink-0 pb-4 flex items-center justify-center">
-                <ChevronRight className="text-gray-300" size={20} />
-              </div>
-            </div>
-          ))
+                  {/* Arrow - 添加悬停动画 */}
+                  <motion.div
+                    className="shrink-0 pb-4 flex items-center justify-center"
+                    whileHover={{ x: 3 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  >
+                    <ChevronRight className="text-gray-300 group-hover:text-oldGold transition-colors" size={20} />
+                  </motion.div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
       </main>
 
       {/* FAB - Add Composer */}
-      <button
+      <motion.button
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-24 right-6 size-14 bg-oldGold text-white rounded-full shadow-xl flex items-center justify-center hover:bg-opacity-90 active:scale-95 transition-all z-30 ring-2 ring-white/20 animate-in zoom-in duration-300 delay-300"
+        className="fixed bottom-24 right-6 size-14 bg-oldGold text-white rounded-full shadow-xl flex items-center justify-center z-30 ring-2 ring-white/20"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.3, type: 'spring', stiffness: 400, damping: 20 }}
+        {...fabAnimation}
       >
         <Plus size={28} />
-      </button>
+      </motion.button>
 
       {/* Add Composer Modal */}
       <Modal

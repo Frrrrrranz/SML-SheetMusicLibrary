@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Landmark, Mic2, Music2, Feather, ChevronLeft, ChevronRight, X, Library } from 'lucide-react';
 import { PERIODS, INSTRUMENTS, GENRES } from '../constants';
 import { Composer } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
+import { staggerContainer, listItem, searchResultsContainer, searchResultItem, quickTransition } from '../utils/animations';
 
 type Category = 'Periods' | 'Instruments' | 'Genres' | 'Composers';
+
+interface SearchScreenProps {
+  composers: Composer[];
+}
 
 export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
   const navigate = useNavigate();
@@ -74,28 +80,23 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
             className="block w-full rounded-xl border-0 py-2.5 pl-10 pr-10 text-base text-textMain bg-[#e8e6e1] placeholder:text-[#8a8470] focus:ring-2 focus:ring-oldGold/50 focus:bg-white transition-all duration-200 ease-in-out font-sans"
             placeholder={t.search.placeholder}
           />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-textSub hover:text-textMain"
-            >
-              <X size={16} fill="currentColor" />
-            </button>
-          )}
+          <AnimatePresence>
+            {searchQuery && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-textSub hover:text-textMain"
+              >
+                <X size={16} fill="currentColor" />
+              </motion.button>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </>
   );
-
-  const getCategoryTitle = (category: Category) => {
-    switch (category) {
-      case 'Periods': return t.search.categories.periods;
-      case 'Instruments': return t.search.categories.instruments;
-      case 'Genres': return t.search.categories.genres;
-      case 'Composers': return t.search.categories.composers;
-      default: return category;
-    }
-  }
 
   const renderCategoryHeader = (title: string) => (
     <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b border-gray-100">
@@ -108,9 +109,13 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
           <span className="text-base">{t.search.title}</span>
         </button>
       </div>
-      <h1 className="px-4 pb-4 text-3xl font-bold tracking-tight text-textMain font-serif animate-in fade-in slide-in-from-left-2 duration-300">
+      <motion.h1
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="px-4 pb-4 text-3xl font-bold tracking-tight text-textMain font-serif"
+      >
         {title}
-      </h1>
+      </motion.h1>
     </div>
   );
 
@@ -119,7 +124,12 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
   const renderComposersList = () => (
     <div className="bg-background min-h-screen pb-24">
       {renderCategoryHeader(t.search.categories.composers)}
-      <div className="divide-y divide-gray-100 pl-4">
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="divide-y divide-gray-100 pl-4"
+      >
         {composers.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-20 pr-4">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-gray-400">
@@ -130,8 +140,9 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
           </div>
         ) : (
           composers.map((composer) => (
-            <div
+            <motion.div
               key={composer.id}
+              variants={listItem}
               onClick={() => handleComposerClick(composer.id)}
               className="flex items-center gap-4 py-3 pr-4 cursor-pointer hover:bg-gray-50 transition-colors active:bg-gray-100"
             >
@@ -143,38 +154,50 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
                 <p className="text-xs text-textSub font-sans uppercase tracking-wider mt-0.5">{composer.period}</p>
               </div>
               <ChevronRight size={18} className="text-gray-300" />
-            </div>
+            </motion.div>
           ))
         )}
-      </div>
+      </motion.div>
     </div>
   );
 
   const renderSimpleList = (title: string, items: string[]) => (
     <div className="bg-background min-h-screen pb-24">
       {renderCategoryHeader(title)}
-      <div className="divide-y divide-gray-100 pl-4">
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="divide-y divide-gray-100 pl-4"
+      >
         {items.map((item) => (
-          <div
+          <motion.div
             key={item}
+            variants={listItem}
             onClick={() => handleTermClick(item)}
             className="flex items-center justify-between py-4 pr-4 cursor-pointer hover:bg-gray-50 transition-colors active:bg-gray-100"
           >
             <span className="text-base font-medium text-textMain font-serif">{item}</span>
             <ChevronRight size={18} className="text-gray-300" />
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 
   const renderPeriodsList = () => (
     <div className="bg-background min-h-screen pb-24">
       {renderCategoryHeader(t.search.categories.periods)}
-      <div className="divide-y divide-gray-100 pl-4">
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+        className="divide-y divide-gray-100 pl-4"
+      >
         {PERIODS.map((period) => (
-          <div
+          <motion.div
             key={period.name}
+            variants={listItem}
             onClick={() => handleTermClick(period.name)}
             className="flex items-center justify-between py-4 pr-4 cursor-pointer hover:bg-gray-50 transition-colors active:bg-gray-100"
           >
@@ -183,9 +206,9 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
               <p className="text-xs text-textSub font-sans mt-0.5">{period.range}</p>
             </div>
             <ChevronRight size={18} className="text-gray-300" />
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 
@@ -204,13 +227,23 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
       <div className="px-4 py-4">
         {searchQuery ? (
           // Search Results View
-          <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={quickTransition}
+          >
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 pl-1">{t.search.topResults}</h2>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
+            <motion.div
+              variants={searchResultsContainer}
+              initial="hidden"
+              animate="visible"
+              className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50"
+            >
               {filteredComposers.length > 0 ? (
                 filteredComposers.map(c => (
-                  <div
+                  <motion.div
                     key={c.id}
+                    variants={searchResultItem}
                     onClick={() => handleComposerClick(c.id)}
                     className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors cursor-pointer"
                   >
@@ -224,23 +257,31 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
                       </p>
                     </div>
                     <ChevronRight size={16} className="text-gray-300" />
-                  </div>
+                  </motion.div>
                 ))
               ) : (
                 <div className="p-8 text-center text-gray-400 font-serif italic">
                   {t.search.noResults.replace('{query}', searchQuery)}
                 </div>
               )}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         ) : (
           // Category Grid View
-          <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-300">
+          <motion.div
+            className="grid grid-cols-2 gap-4"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
             {CATEGORIES.map((cat) => (
-              <button
+              <motion.button
                 key={cat.label}
+                variants={listItem}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => handleCategoryClick(cat.label)}
-                className="group flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white p-6 hover:bg-[#fcfbf9] active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow-md"
+                className="group flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white p-6 hover:bg-[#fcfbf9] transition-colors shadow-sm hover:shadow-md"
               >
                 <cat.icon
                   size={32}
@@ -248,15 +289,11 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
                   strokeWidth={1.5}
                 />
                 <span className="text-lg font-semibold leading-tight text-textMain font-sans">{t.search.categories[cat.key]}</span>
-              </button>
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
     </div>
   );
 };
-
-interface SearchScreenProps {
-  composers: Composer[];
-}
