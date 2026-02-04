@@ -29,6 +29,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   const isAdmin = authProfile?.role === 'admin';
 
   const [viewMode, setViewMode] = useState<ViewMode>('Sheet Music');
+  const [isAnimating, setIsAnimating] = useState(false); // 用于 Apple 风格滑块动画
   const [isEditing, setIsEditing] = useState(false);
 
   // Modal States
@@ -478,18 +479,43 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
           </div>
         </div>
 
-        {/* Segmented Control */}
+        {/* Segmented Control - Apple 风格滑动动画 */}
         <div className="px-6 pb-6 sticky top-[64px] z-10 bg-background transition-all duration-200">
-          <div className="flex h-10 w-full items-center justify-center rounded-lg bg-[#EBEAE6] p-1">
+          <div className="relative flex h-11 w-full items-center rounded-xl bg-[#E8E7E3] p-[3px]">
+            {/* 滑动指示器 - 多阶段 Apple 风格动画 */}
+            <div
+              className={`
+                absolute top-[3px] bottom-[3px] rounded-[10px] bg-white
+                transition-all
+                ${isAnimating
+                  ? 'duration-[400ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] scale-[1.02] shadow-[0_2px_8px_rgba(0,0,0,0.12)]'
+                  : 'duration-200 ease-out scale-100 shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
+                }
+              `}
+              style={{
+                width: 'calc(50% - 3px)',
+                left: viewMode === 'Sheet Music' ? '3px' : 'calc(50%)',
+              }}
+            />
+            {/* Tab 按钮 */}
             {(['Sheet Music', 'Recordings'] as const).map((mode) => (
               <button
                 key={mode}
-                onClick={() => setViewMode(mode)}
+                onClick={() => {
+                  if (viewMode !== mode) {
+                    // 触发动画：先放大
+                    setIsAnimating(true);
+                    setViewMode(mode);
+                    // 动画完成后恢复
+                    setTimeout(() => setIsAnimating(false), 350);
+                  }
+                }}
                 className={`
-                  relative flex-1 h-full rounded-md text-sm font-semibold transition-all duration-200
+                  relative z-10 flex-1 h-full rounded-[10px] text-[13px] font-semibold 
+                  transition-all duration-200
                   ${viewMode === mode
-                    ? 'bg-white text-textMain shadow-sm'
-                    : 'text-textSub hover:text-textMain'
+                    ? 'text-textMain'
+                    : 'text-textSub/70 hover:text-textSub active:scale-95'
                   }
                 `}
               >
