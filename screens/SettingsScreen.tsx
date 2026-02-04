@@ -2,9 +2,11 @@ import React from 'react';
 import { BarChart2, Cloud, ChevronRight, Speaker, Palette, Share, LogOut, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export const SettingsScreen: React.FC = () => {
   const { profile, user, signOut } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   // 生成基于昵称的默认头像 URL
@@ -23,7 +25,7 @@ export const SettingsScreen: React.FC = () => {
   return (
     <div className="min-h-screen bg-background pb-24 font-sans">
       <header className="px-5 pt-14 pb-2">
-        <h1 className="text-[34px] font-bold tracking-tight leading-tight font-serif">Settings</h1>
+        <h1 className="text-[34px] font-bold tracking-tight leading-tight font-serif">{t.settings.title}</h1>
       </header>
 
       {/* Profile Card */}
@@ -49,13 +51,13 @@ export const SettingsScreen: React.FC = () => {
 
       {/* Storage Section */}
       <div className="px-4 mb-6">
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4 mb-2">Storage</h2>
+        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4 mb-2">{t.settings.storage.title}</h2>
         <div className="bg-white rounded-xl overflow-hidden shadow-soft border border-gray-100 divide-y divide-gray-100">
           <div className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
             <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8 group-hover:bg-oldGold/20 transition-colors">
               <BarChart2 size={20} />
             </div>
-            <p className="text-lg font-medium flex-1 text-textMain">Library Usage</p>
+            <p className="text-lg font-medium flex-1 text-textMain">{t.settings.storage.library}</p>
             <ChevronRight className="text-gray-300" size={20} />
           </div>
 
@@ -63,7 +65,7 @@ export const SettingsScreen: React.FC = () => {
             <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8">
               <Cloud size={20} />
             </div>
-            <p className="text-lg font-medium flex-1 text-textMain">Cloud Sync</p>
+            <p className="text-lg font-medium flex-1 text-textMain">{t.settings.storage.cloudSync}</p>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" className="sr-only peer" defaultChecked />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-oldGold peer-checked:after:border-transparent"></div>
@@ -74,13 +76,13 @@ export const SettingsScreen: React.FC = () => {
 
       {/* Preferences Section */}
       <div className="px-4 mb-6">
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4 mb-2">Preferences</h2>
+        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4 mb-2">{t.settings.preferences.title}</h2>
         <div className="bg-white rounded-xl overflow-hidden shadow-soft border border-gray-100 divide-y divide-gray-100">
           <div className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
             <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8 group-hover:bg-oldGold/20 transition-colors">
               <Speaker size={20} />
             </div>
-            <p className="text-lg font-medium flex-1 text-textMain">Audio Quality</p>
+            <p className="text-lg font-medium flex-1 text-textMain">{t.settings.preferences.audioQuality}</p>
             <div className="flex items-center gap-1 text-gray-400">
               <span className="text-base font-normal">High</span>
               <ChevronRight size={20} className="opacity-60" />
@@ -91,7 +93,7 @@ export const SettingsScreen: React.FC = () => {
             <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8 group-hover:bg-oldGold/20 transition-colors">
               <Palette size={20} />
             </div>
-            <p className="text-lg font-medium flex-1 text-textMain">Appearance</p>
+            <p className="text-lg font-medium flex-1 text-textMain">{t.settings.preferences.appearance}</p>
             <div className="flex items-center gap-1 text-gray-400">
               <span className="text-base font-normal">Light</span>
               <ChevronRight size={20} className="opacity-60" />
@@ -102,13 +104,13 @@ export const SettingsScreen: React.FC = () => {
 
       {/* Data Section */}
       <div className="px-4 mb-8">
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4 mb-2">Data</h2>
+        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4 mb-2">{t.settings.data.title}</h2>
         <div className="bg-white rounded-xl overflow-hidden shadow-soft border border-gray-100 divide-y divide-gray-100">
           <div className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
             <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8 group-hover:bg-oldGold/20 transition-colors">
               <Share size={20} />
             </div>
-            <p className="text-lg font-medium flex-1 text-textMain">Export Metadata</p>
+            <p className="text-lg font-medium flex-1 text-textMain">{t.settings.data.export}</p>
             <ChevronRight className="text-gray-300" size={20} />
           </div>
 
@@ -118,7 +120,7 @@ export const SettingsScreen: React.FC = () => {
           >
             <p className="text-lg font-medium text-red-600 flex items-center gap-2">
               <LogOut size={18} />
-              Sign Out
+              {t.settings.data.logout}
             </p>
           </button>
         </div>

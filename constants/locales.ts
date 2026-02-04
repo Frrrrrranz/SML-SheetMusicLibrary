@@ -1,5 +1,10 @@
 export const translations = {
     zh: {
+        navigation: {
+            composers: '库',
+            search: '搜索',
+            settings: '设置',
+        },
         auth: {
             welcome: '欢迎使用 SML',
             welcomeBack: '欢迎回来',
@@ -24,6 +29,39 @@ export const translations = {
                 userAlreadyRegistered: '该邮箱已注册',
                 passwordTooShort: '密码至少需要 6 个字符',
                 genericError: '操作失败，请重试',
+            },
+        },
+        composers: {
+            title: '作曲家',
+            noComposers: '暂无作曲家',
+            addFirst: '点击下方 + 按钮添加您的第一位作曲家',
+            sheetMusic: '{count} 份乐谱',
+            recordings: '{count} 个录音',
+            add: '添加作曲家',
+            creating: '创建中...',
+            form: {
+                name: '姓名',
+                namePlaceholder: '例如：Franz Liszt',
+                period: '时期',
+                periodPlaceholder: '例如：浪漫主义时期',
+            },
+        },
+        settings: {
+            title: '设置',
+            storage: {
+                title: '存储',
+                library: '乐谱库使用量',
+                cloudSync: '云同步',
+            },
+            preferences: {
+                title: '偏好',
+                audioQuality: '音频质量',
+                appearance: '外观',
+            },
+            data: {
+                title: '数据',
+                export: '导出元数据',
+                logout: '退出登录',
             },
         },
         common: {
@@ -58,6 +96,11 @@ export const translations = {
         },
     },
     en: {
+        navigation: {
+            composers: 'Library',
+            search: 'Search',
+            settings: 'Settings',
+        },
         auth: {
             welcome: 'Welcome to SML',
             welcomeBack: 'Welcome back',
@@ -82,6 +125,39 @@ export const translations = {
                 userAlreadyRegistered: 'This email is already registered',
                 passwordTooShort: 'Password should be at least 6 characters',
                 genericError: 'Operation failed, please try again',
+            },
+        },
+        composers: {
+            title: 'Composers',
+            noComposers: 'No Composers Yet',
+            addFirst: 'Tap the + button to add your first composer to the library.',
+            sheetMusic: '{count} Sheet Music',
+            recordings: '{count} Recordings',
+            add: 'Add Composer',
+            creating: 'Creating...',
+            form: {
+                name: 'Name',
+                namePlaceholder: 'e.g. Franz Liszt',
+                period: 'Period',
+                periodPlaceholder: 'e.g. Romantic Period',
+            },
+        },
+        settings: {
+            title: 'Settings',
+            storage: {
+                title: 'Storage',
+                library: 'Library Usage',
+                cloudSync: 'Cloud Sync',
+            },
+            preferences: {
+                title: 'Preferences',
+                audioQuality: 'Audio Quality',
+                appearance: 'Appearance',
+            },
+            data: {
+                title: 'Data',
+                export: 'Export Metadata',
+                logout: 'Sign Out',
             },
         },
         common: {

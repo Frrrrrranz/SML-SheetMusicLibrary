@@ -6,6 +6,7 @@ import { Modal } from '../components/Modal';
 import { uploadAvatar } from '../supabase';
 import { api } from '../api';
 import { staggerContainer, listItem, fabAnimation } from '../utils/animations';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface ComposersScreenProps {
   composers: Composer[];
@@ -15,6 +16,7 @@ interface ComposersScreenProps {
 }
 
 export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onComposerSelect, onAddComposer, onUpdateComposer }) => {
+  const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState('');
   const [period, setPeriod] = useState('');
@@ -31,12 +33,12 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
     if (file) {
       // 验证文件类型
       if (!file.type.startsWith('image/')) {
-        alert('请选择图片文件');
+        alert('Please select an image file'); // 简单提示可以保留英文或通过 t 函数扩展通用错误
         return;
       }
       // 验证文件大小 (最大 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('图片大小不能超过 5MB');
+        alert('Image size limit: 5MB');
         return;
       }
       setImageFile(file);
@@ -94,7 +96,7 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
       resetForm();
     } catch (error) {
       console.error('Failed to save composer:', error);
-      alert('创建失败，请重试');
+      alert(t.auth.errors.genericError);
     } finally {
       setIsUploading(false);
     }
@@ -105,7 +107,7 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background/95 backdrop-blur-md px-6 pt-14 pb-4 border-b border-transparent transition-all duration-300">
         <h1 className="text-4xl font-bold tracking-tight text-textMain font-serif">
-          Composers
+          {t.composers.title}
         </h1>
       </header>
 
@@ -120,9 +122,9 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
             <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-[#EBEAE6] text-oldGold shadow-soft">
               <Library size={48} strokeWidth={1} />
             </div>
-            <h3 className="text-2xl font-serif font-bold text-textMain mb-3">No Composers Yet</h3>
+            <h3 className="text-2xl font-serif font-bold text-textMain mb-3">{t.composers.noComposers}</h3>
             <p className="text-textSub font-sans text-base leading-relaxed text-center max-w-[250px]">
-              Tap the <span className="font-bold text-oldGold">+</span> button to add your first composer to the library.
+              {t.composers.addFirst}
             </p>
           </motion.div>
         ) : (
@@ -159,7 +161,9 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
                       {composer.name}
                     </p>
                     <p className="text-textSub text-[13px] font-medium mt-1 font-sans tracking-wide">
-                      {composer.sheetMusicCount || 0} Sheet Music · {composer.recordingCount || 0} Recordings
+                      {t.composers.sheetMusic.replace('{count}', (composer.sheetMusicCount || 0).toString())}
+                      {' · '}
+                      {t.composers.recordings.replace('{count}', (composer.recordingCount || 0).toString())}
                     </p>
                   </div>
 
@@ -195,7 +199,7 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         variant="bottom"
-        title="Add Composer"
+        title={t.composers.add}
       >
         <div className="px-6 pt-6 pb-32">
           {/* Avatar Upload */}
@@ -230,25 +234,25 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
 
           <div className="space-y-8 font-sans">
             <div className="group relative">
-              <label className="ml-1 mb-1 block text-sm font-medium text-textSub">Name</label>
+              <label className="ml-1 mb-1 block text-sm font-medium text-textSub">{t.composers.form.name}</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full border-0 border-b border-gray-300 bg-transparent px-1 py-2 text-xl font-medium text-textMain placeholder-gray-300 focus:border-oldGold focus:ring-0 transition-colors"
-                placeholder="e.g. Franz Liszt"
+                placeholder={t.composers.form.namePlaceholder}
                 autoFocus
               />
             </div>
 
             <div className="group relative">
-              <label className="ml-1 mb-1 block text-sm font-medium text-textSub">Period</label>
+              <label className="ml-1 mb-1 block text-sm font-medium text-textSub">{t.composers.form.period}</label>
               <input
                 type="text"
                 value={period}
                 onChange={(e) => setPeriod(e.target.value)}
                 className="w-full border-0 border-b border-gray-300 bg-transparent px-1 py-2 text-xl font-medium text-textMain placeholder-gray-300 focus:border-oldGold focus:ring-0 transition-colors"
-                placeholder="e.g. Romantic Period"
+                placeholder={t.composers.form.periodPlaceholder}
               />
             </div>
           </div>
@@ -267,10 +271,10 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, onC
               {isUploading ? (
                 <>
                   <Loader2 size={20} className="animate-spin" />
-                  创建中...
+                  {t.composers.creating}
                 </>
               ) : (
-                'Add Composer'
+                t.composers.add
               )}
             </button>
           </div>
