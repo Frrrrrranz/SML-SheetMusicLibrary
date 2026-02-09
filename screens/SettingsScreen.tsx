@@ -1,12 +1,12 @@
 import React from 'react';
-import { BarChart2, Cloud, ChevronRight, Speaker, Palette, Share, LogOut, User } from 'lucide-react';
+import { BarChart2, Cloud, ChevronRight, Speaker, Palette, Share, LogOut, User, Languages } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export const SettingsScreen: React.FC = () => {
   const { profile, user, signOut } = useAuth();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const navigate = useNavigate();
 
   // 生成基于昵称的默认头像 URL
@@ -96,6 +96,21 @@ export const SettingsScreen: React.FC = () => {
             <p className="text-lg font-medium flex-1 text-textMain">{t.settings.preferences.appearance}</p>
             <div className="flex items-center gap-1 text-gray-400">
               <span className="text-base font-normal">Light</span>
+              <ChevronRight size={20} className="opacity-60" />
+            </div>
+          </div>
+
+          {/* 语言切换选项 */}
+          <div
+            onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
+            className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group"
+          >
+            <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8 group-hover:bg-oldGold/20 transition-colors">
+              <Languages size={20} />
+            </div>
+            <p className="text-lg font-medium flex-1 text-textMain">{t.common.language}</p>
+            <div className="flex items-center gap-1 text-gray-400">
+              <span className="text-base font-normal">{language === 'zh' ? t.common.chinese : t.common.english}</span>
               <ChevronRight size={20} className="opacity-60" />
             </div>
           </div>
