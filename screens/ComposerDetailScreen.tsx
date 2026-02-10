@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Plus, Camera, FileText, Music, Check, Trash2, Edit2, PlayCircle, AlertCircle, Upload, Loader2 } from 'lucide-react';
 import { ViewMode, Composer, Work, Recording } from '../types';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,6 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Modal } from '../components/Modal';
 import { api } from '../api';
 import { uploadSheetMusic, uploadAvatar, deleteAvatar, uploadRecordingFile } from '../supabase';
+import { fadeInUp, staggerContainer, listItemSlide, fabAnimation, tabContent } from '../utils/animations';
 
 interface ComposerDetailScreenProps {
   composerId: string;
@@ -428,8 +430,13 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
       </div>
 
       <div className="flex-1">
-        {/* Hero Section */}
-        <div className="flex flex-col items-center px-6 pt-2 pb-8">
+        {/* Hero Section - 带 fadeInUp 进入动画 */}
+        <motion.div
+          className="flex flex-col items-center px-6 pt-2 pb-8"
+          variants={fadeInUp}
+          initial="hidden"
+          animate="visible"
+        >
           <div
             className="relative mb-6 group cursor-pointer"
             onClick={() => isEditing ? setShowPortraitModal(true) : null}
@@ -477,7 +484,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
               </>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Segmented Control - Apple 风格滑动动画 */}
         <div className="px-6 pb-6 sticky top-[64px] z-10 bg-background transition-all duration-200">
@@ -527,138 +534,152 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
 
         {/* Content List */}
         <div className="flex flex-col px-0">
+          <AnimatePresence mode="wait">
 
-          {/* SHEET MUSIC VIEW */}
-          {viewMode === 'Sheet Music' && (
-            <>
-              {composer.works && composer.works.map((work) => (
-                <div
-                  key={work.id}
-                  onClick={() => {
-                    // NOTE: 非编辑模式下，点击条目打开 PDF 查看
-                    if (!isEditing && work.fileUrl) {
-                      if (isAdmin) {
-                        window.open(work.fileUrl, '_blank');
-                      } else {
-                        setPendingFileUrl(work.fileUrl);
-                        setShowCopyrightModal(true);
+            {/* SHEET MUSIC VIEW */}
+            {viewMode === 'Sheet Music' && (
+              <motion.div
+                key="sheet-music"
+                variants={tabContent}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                {composer.works && composer.works.map((work) => (
+                  <div
+                    key={work.id}
+                    onClick={() => {
+                      // NOTE: 非编辑模式下，点击条目打开 PDF 查看
+                      if (!isEditing && work.fileUrl) {
+                        if (isAdmin) {
+                          window.open(work.fileUrl, '_blank');
+                        } else {
+                          setPendingFileUrl(work.fileUrl);
+                          setShowCopyrightModal(true);
+                        }
                       }
-                    }
-                  }}
-                  className={`group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors border-b border-divider last:border-0 relative overflow-hidden ${!isEditing && work.fileUrl ? 'cursor-pointer' : ''
-                    }`}
-                >
-                  {/* NOTE: 删除按钮仅在编辑模式且为管理员时显示 */}
-                  {isEditing && isAdmin ? (
-                    <button
-                      onClick={(e) => handleDeleteWork(work.id, e)}
-                      className="shrink-0 text-red-500 hover:bg-red-50 p-2 rounded-full -ml-2 transition-colors"
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  ) : (
-                    <div className="shrink-0 text-textSub opacity-70 group-hover:opacity-100 transition-opacity">
-                      <FileText size={24} strokeWidth={1.5} />
-                    </div>
-                  )}
-
-                  <div className="flex flex-1 flex-col justify-center min-w-0">
-                    <p className="text-textMain text-base font-bold leading-tight truncate font-sans">
-                      {work.title}
-                    </p>
-                    <p className="text-textSub text-sm leading-normal truncate font-medium mt-0.5">
-                      {work.edition} · {work.year}
-                    </p>
-                  </div>
-
-                  {/* 只有编辑模式下显示编辑按钮 */}
-                  {isEditing && (
-                    <div className="shrink-0">
+                    }}
+                    className={`group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors border-b border-divider last:border-0 relative overflow-hidden ${!isEditing && work.fileUrl ? 'cursor-pointer' : ''
+                      }`}
+                  >
+                    {/* NOTE: 删除按钮仅在编辑模式且为管理员时显示 */}
+                    {isEditing && isAdmin ? (
                       <button
-                        onClick={(e) => openEditWorkModal(work, e)}
-                        className="flex size-8 items-center justify-center rounded-full text-textSub hover:text-oldGold hover:bg-black/5 transition-colors"
+                        onClick={(e) => handleDeleteWork(work.id, e)}
+                        className="shrink-0 text-red-500 hover:bg-red-50 p-2 rounded-full -ml-2 transition-colors"
                       >
-                        <Edit2 size={16} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-              {(!composer.works || composer.works.length === 0) && (
-                <div className="px-6 py-12 text-center text-gray-400 font-serif italic">
-                  No sheet music added yet.
-                </div>
-              )}
-            </>
-          )}
-
-          {/* RECORDINGS VIEW */}
-          {viewMode === 'Recordings' && (
-            <>
-              {composer.recordings && composer.recordings.map((recording) => (
-                <div
-                  key={recording.id}
-                  onClick={() => {
-                    // NOTE: 非编辑模式下，点击条目播放音频
-                    if (!isEditing && recording.fileUrl) {
-                      if (isAdmin) {
-                        window.open(recording.fileUrl, '_blank');
-                      } else {
-                        setPendingFileUrl(recording.fileUrl);
-                        setShowCopyrightModal(true);
-                      }
-                    }
-                  }}
-                  className={`group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors border-b border-divider last:border-0 relative ${!isEditing && recording.fileUrl ? 'cursor-pointer' : ''
-                    }`}
-                >
-                  {/* NOTE: 删除按钮仅在编辑模式且为管理员时显示 */}
-                  {isEditing && isAdmin ? (
-                    <button
-                      onClick={(e) => handleDeleteRecording(recording.id, e)}
-                      className="shrink-0 text-red-500 hover:bg-red-50 p-2 rounded-full -ml-2 transition-colors"
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  ) : (
-                    <div className={`shrink-0 opacity-80 group-hover:opacity-100 transition-opacity ${recording.fileUrl ? 'text-oldGold' : 'text-gray-400'}`}>
-                      <PlayCircle size={28} strokeWidth={1.5} />
-                    </div>
-                  )}
-
-                  <div className="flex flex-1 flex-col justify-center min-w-0">
-                    <p className="text-textMain text-base font-bold leading-tight truncate font-sans">
-                      {recording.title}
-                    </p>
-                    <p className="text-textSub text-sm leading-normal truncate font-medium mt-0.5">
-                      {recording.performer} · {recording.year}
-                    </p>
-                  </div>
-
-                  {/* Right Side: Edit or Duration */}
-                  <div className="shrink-0">
-                    {isEditing ? (
-                      <button
-                        onClick={(e) => openEditRecordingModal(recording, e)}
-                        className="flex size-8 items-center justify-center rounded-full text-textSub hover:text-oldGold hover:bg-black/5 transition-colors"
-                      >
-                        <Edit2 size={16} />
+                        <Trash2 size={20} />
                       </button>
                     ) : (
-                      <div className="text-textSub text-xs font-semibold tracking-wide">
-                        {recording.duration}
+                      <div className="shrink-0 text-textSub opacity-70 group-hover:opacity-100 transition-opacity">
+                        <FileText size={24} strokeWidth={1.5} />
+                      </div>
+                    )}
+
+                    <div className="flex flex-1 flex-col justify-center min-w-0">
+                      <p className="text-textMain text-base font-bold leading-tight truncate font-sans">
+                        {work.title}
+                      </p>
+                      <p className="text-textSub text-sm leading-normal truncate font-medium mt-0.5">
+                        {work.edition} · {work.year}
+                      </p>
+                    </div>
+
+                    {/* 只有编辑模式下显示编辑按钮 */}
+                    {isEditing && (
+                      <div className="shrink-0">
+                        <button
+                          onClick={(e) => openEditWorkModal(work, e)}
+                          className="flex size-8 items-center justify-center rounded-full text-textSub hover:text-oldGold hover:bg-black/5 transition-colors"
+                        >
+                          <Edit2 size={16} />
+                        </button>
                       </div>
                     )}
                   </div>
-                </div>
-              ))}
-              {(!composer.recordings || composer.recordings.length === 0) && (
-                <div className="px-6 py-12 text-center text-gray-400 font-serif italic">
-                  No recordings available.
-                </div>
-              )}
-            </>
-          )}
+                ))}
+                {(!composer.works || composer.works.length === 0) && (
+                  <div className="px-6 py-12 text-center text-gray-400 font-serif italic">
+                    No sheet music added yet.
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* RECORDINGS VIEW */}
+            {viewMode === 'Recordings' && (
+              <motion.div
+                key="recordings"
+                variants={tabContent}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                {composer.recordings && composer.recordings.map((recording) => (
+                  <div
+                    key={recording.id}
+                    onClick={() => {
+                      // NOTE: 非编辑模式下，点击条目播放音频
+                      if (!isEditing && recording.fileUrl) {
+                        if (isAdmin) {
+                          window.open(recording.fileUrl, '_blank');
+                        } else {
+                          setPendingFileUrl(recording.fileUrl);
+                          setShowCopyrightModal(true);
+                        }
+                      }
+                    }}
+                    className={`group flex items-center gap-4 px-6 py-4 hover:bg-black/5 transition-colors border-b border-divider last:border-0 relative ${!isEditing && recording.fileUrl ? 'cursor-pointer' : ''
+                      }`}
+                  >
+                    {/* NOTE: 删除按钮仅在编辑模式且为管理员时显示 */}
+                    {isEditing && isAdmin ? (
+                      <button
+                        onClick={(e) => handleDeleteRecording(recording.id, e)}
+                        className="shrink-0 text-red-500 hover:bg-red-50 p-2 rounded-full -ml-2 transition-colors"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    ) : (
+                      <div className={`shrink-0 opacity-80 group-hover:opacity-100 transition-opacity ${recording.fileUrl ? 'text-oldGold' : 'text-gray-400'}`}>
+                        <PlayCircle size={28} strokeWidth={1.5} />
+                      </div>
+                    )}
+
+                    <div className="flex flex-1 flex-col justify-center min-w-0">
+                      <p className="text-textMain text-base font-bold leading-tight truncate font-sans">
+                        {recording.title}
+                      </p>
+                      <p className="text-textSub text-sm leading-normal truncate font-medium mt-0.5">
+                        {recording.performer} · {recording.year}
+                      </p>
+                    </div>
+
+                    {/* Right Side: Edit or Duration */}
+                    <div className="shrink-0">
+                      {isEditing ? (
+                        <button
+                          onClick={(e) => openEditRecordingModal(recording, e)}
+                          className="flex size-8 items-center justify-center rounded-full text-textSub hover:text-oldGold hover:bg-black/5 transition-colors"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                      ) : (
+                        <div className="text-textSub text-xs font-semibold tracking-wide">
+                          {recording.duration}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {(!composer.recordings || composer.recordings.length === 0) && (
+                  <div className="px-6 py-12 text-center text-gray-400 font-serif italic">
+                    No recordings available.
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Delete Composer Button (Edit Mode Only, Admin Only) */}
@@ -682,12 +703,17 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
       </footer>
 
       {/* FAB - Shows for both modes now */}
-      <button
+      {/* FAB - 带弹入动画 */}
+      <motion.button
         onClick={viewMode === 'Sheet Music' ? openAddWorkModal : openAddRecordingModal}
-        className="fixed bottom-6 right-6 size-14 bg-oldGold text-white rounded-full shadow-xl flex items-center justify-center hover:bg-opacity-90 active:scale-95 transition-all z-30 ring-2 ring-white/20"
+        className="fixed bottom-6 right-6 size-14 bg-oldGold text-white rounded-full shadow-xl flex items-center justify-center hover:bg-opacity-90 transition-all z-30 ring-2 ring-white/20"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.3, type: 'spring', stiffness: 400, damping: 20 }}
+        {...fabAnimation}
       >
         <Plus size={28} />
-      </button>
+      </motion.button>
 
       {/* === MODALS === */}
 

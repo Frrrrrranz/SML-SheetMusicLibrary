@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from './api';
+import { motion, AnimatePresence } from 'framer-motion';
 import { HashRouter, Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { BottomNav } from './components/BottomNav';
@@ -11,6 +12,7 @@ import { AuthScreen } from './screens/AuthScreen';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { Composer } from './types';
+import { pageTransition } from './utils/animations';
 
 
 // 主应用内容（需要登录）
@@ -77,39 +79,50 @@ const AppContent: React.FC = () => {
         but full width on mobile. 
       */}
       <div className="w-full max-w-[480px] bg-background min-h-screen shadow-2xl relative overflow-hidden">
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <ComposersScreen
-                composers={composers}
-                isLoading={isLoading}
-                onComposerSelect={(id) => navigate(`/composer/${id}`)}
-                onAddComposer={handleAddComposer}
-                onUpdateComposer={handleUpdateComposer}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname.split('/')[1] || 'home'}
+            variants={pageTransition}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="min-h-screen"
+          >
+            <Routes location={location}>
+              <Route
+                path="/"
+                element={
+                  <ComposersScreen
+                    composers={composers}
+                    isLoading={isLoading}
+                    onComposerSelect={(id) => navigate(`/composer/${id}`)}
+                    onAddComposer={handleAddComposer}
+                    onUpdateComposer={handleUpdateComposer}
+                  />
+                }
               />
-            }
-          />
-          <Route
-            path="/search"
-            element={<SearchScreen composers={composers} />}
-          />
-          <Route
-            path="/settings"
-            element={<SettingsScreen />}
-          />
-          {/* Detail Routes */}
-          <Route
-            path="/composer/:id"
-            element={
-              <DetailWrapper
-                composers={composers}
-                onUpdateComposer={handleUpdateComposer}
-                onDeleteComposer={handleDeleteComposer}
+              <Route
+                path="/search"
+                element={<SearchScreen composers={composers} />}
               />
-            }
-          />
-        </Routes>
+              <Route
+                path="/settings"
+                element={<SettingsScreen />}
+              />
+              {/* Detail Routes */}
+              <Route
+                path="/composer/:id"
+                element={
+                  <DetailWrapper
+                    composers={composers}
+                    onUpdateComposer={handleUpdateComposer}
+                    onDeleteComposer={handleDeleteComposer}
+                  />
+                }
+              />
+            </Routes>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Conditionally render Nav based on path */}
         {!location.pathname.includes('/composer/') && (

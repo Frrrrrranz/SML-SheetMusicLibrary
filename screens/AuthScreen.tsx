@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, ArrowRight, Loader2, CheckCircle, AlertCircle, Languages } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Lock, User, ArrowRight, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { fadeInUp, fadeInDown } from '../utils/animations';
 
 type AuthMode = 'login' | 'register';
 
@@ -80,11 +82,21 @@ export const AuthScreen: React.FC = () => {
     if (showVerificationMessage) {
         return (
             <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
-                <div className="w-full max-w-sm text-center">
+                <motion.div
+                    className="w-full max-w-sm text-center"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                >
                     <div className="flex justify-center mb-6">
-                        <div className="size-20 bg-green-100 rounded-full flex items-center justify-center">
+                        <motion.div
+                            className="size-20 bg-green-100 rounded-full flex items-center justify-center"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 20 }}
+                        >
                             <CheckCircle className="text-green-600" size={40} />
-                        </div>
+                        </motion.div>
                     </div>
 
                     <h1 className="text-2xl font-bold font-serif text-textMain mb-3">
@@ -106,7 +118,7 @@ export const AuthScreen: React.FC = () => {
                     >
                         {t.auth.backToLogin}
                     </button>
-                </div>
+                </motion.div>
             </div>
         );
     }
@@ -115,42 +127,70 @@ export const AuthScreen: React.FC = () => {
         <div className="min-h-screen bg-background flex flex-col">
             {/* Header */}
             <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-                {/* Logo / Brand */}
-                <div className="mb-10 text-center">
+                {/* Logo / Brand - fadeInDown 动画 */}
+                <motion.div
+                    className="mb-10 text-center"
+                    variants={fadeInDown}
+                    initial="hidden"
+                    animate="visible"
+                >
                     <h1 className="text-4xl font-bold font-serif text-textMain tracking-tight">
                         SML
                     </h1>
                     <p className="text-textSub text-sm mt-2 tracking-wide">
                         Sheet Music Library
                     </p>
-                </div>
+                </motion.div>
 
-                {/* Form Card */}
-                <div className="w-full max-w-sm">
-                    <h2 className="text-2xl font-bold font-serif text-textMain mb-8 text-center">
-                        {mode === 'login'
-                            ? (isFirstVisit ? t.auth.welcome : t.auth.welcomeBack)
-                            : t.auth.join
-                        }
-                    </h2>
+                {/* Form Card - fadeInUp 动画 */}
+                <motion.div
+                    className="w-full max-w-sm"
+                    variants={fadeInUp}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    {/* 标题带 AnimatePresence 切换过渡 */}
+                    <AnimatePresence mode="wait">
+                        <motion.h2
+                            key={mode}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="text-2xl font-bold font-serif text-textMain mb-8 text-center"
+                        >
+                            {mode === 'login'
+                                ? (isFirstVisit ? t.auth.welcome : t.auth.welcomeBack)
+                                : t.auth.join
+                            }
+                        </motion.h2>
+                    </AnimatePresence>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Nickname (Register Only) */}
-                        {mode === 'register' && (
-                            <div className="relative">
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400">
-                                    <User size={20} />
-                                </div>
-                                <input
-                                    type="text"
-                                    value={nickname}
-                                    onChange={(e) => setNickname(e.target.value)}
-                                    placeholder={t.auth.nickname}
-                                    className="w-full pl-8 pr-4 py-3 border-b-2 border-gray-200 bg-transparent text-textMain placeholder-gray-400 focus:border-oldGold focus:outline-none transition-colors text-lg"
-                                    autoComplete="name"
-                                />
-                            </div>
-                        )}
+                        {/* Nickname (Register Only) - 带过渡动画 */}
+                        <AnimatePresence>
+                            {mode === 'register' && (
+                                <motion.div
+                                    className="relative"
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.25, ease: 'easeInOut' }}
+                                >
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400">
+                                        <User size={20} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={nickname}
+                                        onChange={(e) => setNickname(e.target.value)}
+                                        placeholder={t.auth.nickname}
+                                        className="w-full pl-8 pr-4 py-3 border-b-2 border-gray-200 bg-transparent text-textMain placeholder-gray-400 focus:border-oldGold focus:outline-none transition-colors text-lg"
+                                        autoComplete="name"
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
                         {/* Email */}
                         <div className="relative">
@@ -185,22 +225,31 @@ export const AuthScreen: React.FC = () => {
                             />
                         </div>
 
-                        {/* Error Message */}
-                        {error && (
-                            <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg">
-                                <AlertCircle size={18} />
-                                <span>{error}</span>
-                            </div>
-                        )}
+                        {/* Error Message - 带淡入动画 */}
+                        <AnimatePresence>
+                            {error && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -5 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="flex items-center gap-2 text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg"
+                                >
+                                    <AlertCircle size={18} />
+                                    <span>{error}</span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
                         {/* Submit Button */}
-                        <button
+                        <motion.button
                             type="submit"
                             disabled={loading}
+                            whileTap={{ scale: 0.98 }}
                             className={`
                 w-full py-4 rounded-full font-bold text-lg text-white
                 flex items-center justify-center gap-2
-                transition-all active:scale-[0.98]
+                transition-all
                 ${loading ? 'bg-gray-300 cursor-not-allowed' : 'bg-oldGold hover:bg-[#d4ac26] shadow-lg shadow-oldGold/30'}
               `}
                         >
@@ -215,7 +264,7 @@ export const AuthScreen: React.FC = () => {
                                     <ArrowRight size={20} />
                                 </>
                             )}
-                        </button>
+                        </motion.button>
                     </form>
 
                     <div className="mt-8 text-center text-sm">
@@ -252,13 +301,18 @@ export const AuthScreen: React.FC = () => {
                             English
                         </button>
                     </div>
-                </div>
+                </motion.div>
             </div>
 
             {/* Footer */}
-            <div className="py-6 text-center text-gray-400 text-xs">
+            <motion.div
+                className="py-6 text-center text-gray-400 text-xs"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.4 }}
+            >
                 © 2025 SML Sheet Music Library
-            </div>
+            </motion.div>
         </div>
     );
 };

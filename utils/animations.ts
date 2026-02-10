@@ -221,3 +221,52 @@ export const searchResultItem: Variants = {
         transition: quickTransition,
     },
 };
+
+// =============================================
+// 页面过渡动画
+// =============================================
+
+// 路由切换过渡（淡入淡出）
+export const pageTransition: Variants = {
+    initial: {
+        opacity: 0,
+    },
+    animate: {
+        opacity: 1,
+        transition: {
+            duration: 0.25,
+            ease: 'easeOut',
+        },
+    },
+    exit: {
+        opacity: 0,
+        transition: {
+            duration: 0.15,
+            ease: 'easeIn',
+        },
+    },
+};
+
+// Tab 内容切换过渡（淡入 + 轻微位移）
+export const tabContent: Variants = {
+    initial: {
+        opacity: 0,
+        y: 8,
+    },
+    animate: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.25,
+            ease: [0.25, 0.1, 0.25, 1],
+        },
+    },
+    exit: {
+        opacity: 0,
+        y: -8,
+        transition: {
+            duration: 0.15,
+            ease: 'easeIn',
+        },
+    },
+};

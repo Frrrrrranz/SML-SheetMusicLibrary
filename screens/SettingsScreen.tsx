@@ -1,8 +1,10 @@
 import React from 'react';
-import { BarChart2, Cloud, ChevronRight, Speaker, Palette, Share, LogOut, User, Languages } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { LogOut, Languages, ChevronRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { staggerContainer, listItem } from '../utils/animations';
 
 export const SettingsScreen: React.FC = () => {
   const { profile, user, signOut } = useAuth();
@@ -24,122 +26,87 @@ export const SettingsScreen: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24 font-sans">
-      <header className="px-5 pt-14 pb-2">
-        <h1 className="text-[34px] font-bold tracking-tight leading-tight font-serif">{t.settings.title}</h1>
+      {/* Header - 与 ComposersScreen / SearchScreen 保持一致的静态标题 */}
+      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur-md px-5 pt-14 pb-4 border-b border-transparent transition-all duration-300">
+        <h1 className="text-4xl font-bold tracking-tight text-textMain font-serif">
+          {t.settings.title}
+        </h1>
       </header>
 
-      {/* Profile Card */}
-      <div className="px-4 mb-8 mt-2">
-        <div className="flex items-center gap-4 bg-white p-4 rounded-xl shadow-soft border border-gray-100">
-          <div className="relative shrink-0">
-            <img
-              src={avatarUrl}
-              alt="Profile"
-              className="h-16 w-16 rounded-full object-cover border border-gray-100 shadow-sm"
-            />
+      {/* 使用与首页/搜索页相同的 staggerContainer + listItem 动画模式 */}
+      <motion.div
+        className="px-4 py-2"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Profile Card */}
+        <motion.div variants={listItem} className="mb-8 mt-2">
+          <div className="flex items-center gap-4 bg-white p-4 rounded-xl shadow-soft border border-gray-100">
+            <div className="relative shrink-0">
+              <img
+                src={avatarUrl}
+                alt="Profile"
+                className="h-16 w-16 rounded-full object-cover border border-gray-100 shadow-sm"
+              />
+            </div>
+            <div className="flex flex-col justify-center flex-1 min-w-0">
+              <p className="text-xl font-bold leading-tight tracking-tight font-serif truncate">
+                {profile?.nickname || 'User'}
+              </p>
+              <p className="text-textSub text-sm font-medium mt-1 truncate">
+                {user?.email || ''}
+              </p>
+            </div>
           </div>
-          <div className="flex flex-col justify-center flex-1 min-w-0">
-            <p className="text-xl font-bold leading-tight tracking-tight font-serif truncate">
-              {profile?.nickname || 'User'}
-            </p>
-            <p className="text-textSub text-sm font-medium mt-1 truncate">
-              {user?.email || ''}
-            </p>
-          </div>
-        </div>
-      </div>
+        </motion.div>
 
-      {/* Storage Section */}
-      <div className="px-4 mb-6">
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4 mb-2">{t.settings.storage.title}</h2>
-        <div className="bg-white rounded-xl overflow-hidden shadow-soft border border-gray-100 divide-y divide-gray-100">
-          <div className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
-            <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8 group-hover:bg-oldGold/20 transition-colors">
-              <BarChart2 size={20} />
-            </div>
-            <p className="text-lg font-medium flex-1 text-textMain">{t.settings.storage.library}</p>
-            <ChevronRight className="text-gray-300" size={20} />
-          </div>
-
-          <div className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors">
-            <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8">
-              <Cloud size={20} />
-            </div>
-            <p className="text-lg font-medium flex-1 text-textMain">{t.settings.storage.cloudSync}</p>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" className="sr-only peer" defaultChecked />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-oldGold peer-checked:after:border-transparent"></div>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {/* Preferences Section */}
-      <div className="px-4 mb-6">
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4 mb-2">{t.settings.preferences.title}</h2>
-        <div className="bg-white rounded-xl overflow-hidden shadow-soft border border-gray-100 divide-y divide-gray-100">
-          <div className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
-            <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8 group-hover:bg-oldGold/20 transition-colors">
-              <Speaker size={20} />
-            </div>
-            <p className="text-lg font-medium flex-1 text-textMain">{t.settings.preferences.audioQuality}</p>
-            <div className="flex items-center gap-1 text-gray-400">
-              <span className="text-base font-normal">High</span>
-              <ChevronRight size={20} className="opacity-60" />
+        {/* Preferences Section */}
+        <motion.div variants={listItem} className="mb-6">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4 mb-2">
+            {t.settings.preferences.title}
+          </h2>
+          <div className="bg-white rounded-xl overflow-hidden shadow-soft border border-gray-100">
+            {/* 语言切换选项 - 添加提示文字 */}
+            <div
+              onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
+              className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group"
+            >
+              <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8 group-hover:bg-oldGold/20 transition-colors">
+                <Languages size={20} />
+              </div>
+              <div className="flex-1">
+                <p className="text-lg font-medium text-textMain">{t.common.language}</p>
+                <p className="text-xs text-textSub mt-0.5">
+                  {language === 'zh' ? '点击切换为 English' : 'Tap to switch to 中文'}
+                </p>
+              </div>
+              <div className="flex items-center gap-1 text-gray-400">
+                <span className="text-base font-normal">{language === 'zh' ? t.common.chinese : t.common.english}</span>
+                <ChevronRight size={20} className="opacity-60" />
+              </div>
             </div>
           </div>
+        </motion.div>
 
-          <div className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
-            <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8 group-hover:bg-oldGold/20 transition-colors">
-              <Palette size={20} />
-            </div>
-            <p className="text-lg font-medium flex-1 text-textMain">{t.settings.preferences.appearance}</p>
-            <div className="flex items-center gap-1 text-gray-400">
-              <span className="text-base font-normal">Light</span>
-              <ChevronRight size={20} className="opacity-60" />
-            </div>
+        {/* Account Section */}
+        <motion.div variants={listItem} className="mb-8">
+          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4 mb-2">
+            {t.settings.data.title}
+          </h2>
+          <div className="bg-white rounded-xl overflow-hidden shadow-soft border border-gray-100">
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center justify-center px-4 py-3.5 hover:bg-red-50 transition-colors active:bg-red-100"
+            >
+              <p className="text-lg font-medium text-red-600 flex items-center gap-2">
+                <LogOut size={18} />
+                {t.settings.data.logout}
+              </p>
+            </button>
           </div>
-
-          {/* 语言切换选项 */}
-          <div
-            onClick={() => setLanguage(language === 'zh' ? 'en' : 'zh')}
-            className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group"
-          >
-            <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8 group-hover:bg-oldGold/20 transition-colors">
-              <Languages size={20} />
-            </div>
-            <p className="text-lg font-medium flex-1 text-textMain">{t.common.language}</p>
-            <div className="flex items-center gap-1 text-gray-400">
-              <span className="text-base font-normal">{language === 'zh' ? t.common.chinese : t.common.english}</span>
-              <ChevronRight size={20} className="opacity-60" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Data Section */}
-      <div className="px-4 mb-8">
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-4 mb-2">{t.settings.data.title}</h2>
-        <div className="bg-white rounded-xl overflow-hidden shadow-soft border border-gray-100 divide-y divide-gray-100">
-          <div className="flex items-center gap-4 px-4 py-3.5 hover:bg-gray-50 transition-colors cursor-pointer group">
-            <div className="bg-oldGold/10 text-oldGold flex items-center justify-center rounded-lg shrink-0 size-8 group-hover:bg-oldGold/20 transition-colors">
-              <Share size={20} />
-            </div>
-            <p className="text-lg font-medium flex-1 text-textMain">{t.settings.data.export}</p>
-            <ChevronRight className="text-gray-300" size={20} />
-          </div>
-
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center justify-center px-4 py-3.5 hover:bg-red-50 transition-colors active:bg-red-100"
-          >
-            <p className="text-lg font-medium text-red-600 flex items-center gap-2">
-              <LogOut size={18} />
-              {t.settings.data.logout}
-            </p>
-          </button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
