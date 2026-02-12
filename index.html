@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>SML - Sheet Music Library</title>
   <meta name="description" content="优雅的乐谱与录音管理应用，帮助音乐爱好者整理古典音乐收藏" />
   <meta property="og:title" content="SML - Sheet Music Library" />
@@ -17,10 +18,10 @@
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/logo.png" />
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#C5A059" />
+  <meta name="theme-color" content="#FAFAFA" />
   <!-- iOS PWA 全屏模式 -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="SML" />
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -62,6 +63,9 @@
       background-color: #FAFAFA;
       color: #171611;
       -webkit-font-smoothing: antialiased;
+      /* 适配全面屏安全区域（刘海屏/圆角屏），standalone 模式下状态栏区域自动留白 */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
     /* Hide scrollbar for clean UI */
