@@ -14,6 +14,7 @@ import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { Composer } from './types';
 import { pageTransition } from './utils/animations';
 import { SplashScreen } from './screens/SplashScreen';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
 
 // 主应用内容（需要登录）
@@ -132,6 +133,9 @@ const AppContent: React.FC = () => {
             onNavigate={(path) => navigate(path)}
           />
         )}
+
+        {/* PWA 添加到主屏幕提示 */}
+        <PWAInstallPrompt />
       </div>
     </div>
   );

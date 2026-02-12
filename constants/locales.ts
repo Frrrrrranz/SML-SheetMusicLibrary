@@ -94,6 +94,14 @@ export const translations = {
                 work: '作品匹配',
             }
         },
+        pwa: {
+            title: '添加到主屏幕',
+            description: '将 SML 添加到主屏幕，获得更佳的应用体验。',
+            iosSteps: '点击底部 分享按钮 ⎋ → 选择「添加到主屏幕」',
+            androidSteps: '点击右上角 菜单 ⋮ → 选择「添加到主屏幕」',
+            confirm: '知道了',
+            dontRemind: '以后不再提醒',
+        },
     },
     en: {
         navigation: {
@@ -189,6 +197,14 @@ export const translations = {
                 composer: 'Composer',
                 work: 'Work Match',
             }
+        },
+        pwa: {
+            title: 'Add to Home Screen',
+            description: 'Add SML to your home screen for a better app experience.',
+            iosSteps: 'Tap the Share button ⎋ at the bottom → Select "Add to Home Screen"',
+            androidSteps: 'Tap the Menu ⋮ at the top right → Select "Add to Home Screen"',
+            confirm: 'Got it',
+            dontRemind: "Don't remind me again",
         },
     },
 };
