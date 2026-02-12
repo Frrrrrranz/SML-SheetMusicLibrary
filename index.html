@@ -64,7 +64,8 @@
       color: #171611;
       -webkit-font-smoothing: antialiased;
       /* 适配全面屏安全区域（刘海屏/圆角屏），standalone 模式下状态栏区域自动留白 */
-      padding-top: env(safe-area-inset-top);
+      /* 适配全面屏安全区域（刘海屏/圆角屏），standalone 模式下状态栏区域自动留白 */
+      /* 移除 padding-top: env(safe-area-inset-top)，由各页面 Header 独立处理 */
       padding-bottom: env(safe-area-inset-bottom);
     }
 

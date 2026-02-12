@@ -63,12 +63,13 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
 
   const renderSearchHeader = () => (
     <>
-      <header className="px-4 pt-12 pb-2">
+      {/* Header - 沉浸式适配：padding-top 需要包含 safe-area */}
+      <header className="px-4 pt-[calc(env(safe-area-inset-top)+3rem)] pb-2">
         <h1 className="text-4xl font-bold tracking-tight text-textMain font-serif">{t.search.title}</h1>
       </header>
 
-      {/* Search Bar */}
-      <div className="px-4 py-3 sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
+      {/* Search Bar - 粘性定位，透明度调整 */}
+      <div className="px-4 py-3 sticky top-0 z-10 bg-background/80 backdrop-blur-md top-[calc(env(safe-area-inset-top))]">
         <div className="relative flex w-full items-center">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-textSub">
             <Search size={20} />

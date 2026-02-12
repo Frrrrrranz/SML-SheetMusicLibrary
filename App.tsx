@@ -13,6 +13,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { Composer } from './types';
 import { pageTransition } from './utils/animations';
+import { SplashScreen } from './screens/SplashScreen';
 
 
 // 主应用内容（需要登录）
@@ -188,6 +189,7 @@ const AuthGuard: React.FC = () => {
 const App: React.FC = () => {
   return (
     <>
+      <SplashScreen />
       <LanguageProvider>
         <AuthProvider>
           <HashRouter>

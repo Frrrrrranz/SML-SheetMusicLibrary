@@ -27,7 +27,8 @@ export const SettingsScreen: React.FC = () => {
   return (
     <div className="min-h-screen bg-background pb-24 font-sans">
       {/* Header - 与 ComposersScreen / SearchScreen 保持一致的静态标题 */}
-      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur-md px-5 pt-14 pb-4 border-b border-transparent transition-all duration-300">
+      {/* Header - 沉浸式设计，适配刘海屏 */}
+      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl px-5 pt-[calc(env(safe-area-inset-top)+3.5rem)] pb-4 border-b border-transparent transition-all duration-300">
         <h1 className="text-4xl font-bold tracking-tight text-textMain font-serif">
           {t.settings.title}
         </h1>
