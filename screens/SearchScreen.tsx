@@ -69,7 +69,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
       </header>
 
       {/* Search Bar - 粘性定位，透明度调整 */}
-      <div className="px-4 py-3 sticky top-0 z-10 bg-background/90 backdrop-blur-xl backdrop-saturate-150 top-[calc(env(safe-area-inset-top))] transition-all duration-300">
+      <div className="px-4 py-3 sticky top-0 z-10 bg-background/60 backdrop-blur-2xl backdrop-saturate-150 top-[calc(env(safe-area-inset-top))]">
         <div className="relative flex w-full items-center">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-textSub">
             <Search size={20} />
@@ -100,7 +100,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ composers }) => {
   );
 
   const renderCategoryHeader = (title: string) => (
-    <div className="sticky top-0 z-10 bg-background/90 backdrop-blur-xl backdrop-saturate-150 border-b border-black/5 transition-all duration-300">
+    <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b border-gray-100">
       <div className="px-4 pt-12 pb-4 flex items-center">
         <button
           onClick={handleBack}

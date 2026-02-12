@@ -411,7 +411,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   return (
     <div className="min-h-screen bg-background flex flex-col relative">
       {/* Top Nav - 沉浸式适配 */}
-      <div className="sticky top-0 z-20 flex items-center justify-between px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] bg-background/90 backdrop-blur-xl backdrop-saturate-150 transition-all duration-300 border-b border-white/5">
+      <div className="sticky top-0 z-20 flex items-center justify-between px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] bg-background/60 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300">
         <button
           onClick={onBack}
           className="flex size-10 items-center justify-center rounded-full text-oldGold hover:bg-black/5 transition-colors"
@@ -487,7 +487,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
         </motion.div>
 
         {/* Segmented Control - Apple Music 风格毛玻璃滑动 Tab */}
-        <div className="px-6 pb-6 sticky top-[64px] z-10 bg-background/85 backdrop-blur-xl transition-all duration-200 pt-2">
+        <div className="px-6 pb-6 sticky top-[64px] z-10 bg-background/70 backdrop-blur-2xl transition-all duration-200">
           <div className="relative flex h-11 w-full items-center rounded-xl bg-black/[0.06] backdrop-blur-xl p-[3px] border border-white/30 shadow-sm shadow-black/5">
             {/* 滑动指示器 - Apple Music 毛玻璃风格 */}
             <div
