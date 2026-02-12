@@ -107,7 +107,8 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, isL
     <div className="min-h-screen w-full bg-background pb-24 relative">
       {/* Header */}
       {/* Header - 沉浸式设计，适配刘海屏 */}
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl px-6 pt-[calc(env(safe-area-inset-top)+3.5rem)] pb-4 border-b border-transparent transition-all duration-300">
+      {/* Header - 沉浸式设计，适配刘海屏 */}
+      <header className="sticky top-0 z-10 bg-background/60 backdrop-blur-2xl backdrop-saturate-150 px-6 pt-[calc(env(safe-area-inset-top)+3.5rem)] pb-4 transition-all duration-300">
         <h1 className="text-4xl font-bold tracking-tight text-textMain font-serif">
           {t.composers.title}
         </h1>

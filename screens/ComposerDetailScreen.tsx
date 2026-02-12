@@ -411,7 +411,7 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
   return (
     <div className="min-h-screen bg-background flex flex-col relative">
       {/* Top Nav - 沉浸式适配 */}
-      <div className="sticky top-0 z-20 flex items-center justify-between px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] bg-background/80 backdrop-blur-xl transition-all duration-300">
+      <div className="sticky top-0 z-20 flex items-center justify-between px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] bg-background/60 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-300">
         <button
           onClick={onBack}
           className="flex size-10 items-center justify-center rounded-full text-oldGold hover:bg-black/5 transition-colors"
