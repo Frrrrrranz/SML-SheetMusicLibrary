@@ -486,17 +486,19 @@ export const ComposerDetailScreen: React.FC<ComposerDetailScreenProps> = ({
           </div>
         </motion.div>
 
-        {/* Segmented Control - Apple 风格滑动动画 */}
-        <div className="px-6 pb-6 sticky top-[64px] z-10 bg-background transition-all duration-200">
-          <div className="relative flex h-11 w-full items-center rounded-xl bg-[#E8E7E3] p-[3px]">
-            {/* 滑动指示器 - 多阶段 Apple 风格动画 */}
+        {/* Segmented Control - Apple Music 风格毛玻璃滑动 Tab */}
+        <div className="px-6 pb-6 sticky top-[64px] z-10 bg-background/70 backdrop-blur-2xl transition-all duration-200">
+          <div className="relative flex h-11 w-full items-center rounded-xl bg-black/[0.06] backdrop-blur-xl p-[3px] border border-white/30 shadow-sm shadow-black/5">
+            {/* 滑动指示器 - Apple Music 毛玻璃风格 */}
             <div
               className={`
-                absolute top-[3px] bottom-[3px] rounded-[10px] bg-white
+                absolute top-[3px] bottom-[3px] rounded-[10px]
+                bg-white/80 backdrop-blur-md
+                border border-white/50
                 transition-all
                 ${isAnimating
-                  ? 'duration-[400ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] scale-[1.02] shadow-[0_2px_8px_rgba(0,0,0,0.12)]'
-                  : 'duration-200 ease-out scale-100 shadow-[0_1px_3px_rgba(0,0,0,0.08)]'
+                  ? 'duration-[400ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] scale-[1.02] shadow-[0_2px_12px_rgba(0,0,0,0.1),0_1px_4px_rgba(0,0,0,0.06)]'
+                  : 'duration-200 ease-out scale-100 shadow-[0_1px_4px_rgba(0,0,0,0.06),0_0px_2px_rgba(0,0,0,0.04)]'
                 }
               `}
               style={{
