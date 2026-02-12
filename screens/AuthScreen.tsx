@@ -311,7 +311,7 @@ export const AuthScreen: React.FC = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5, duration: 0.4 }}
             >
-                © 2025 SML Sheet Music Library
+                © 2026 SML
             </motion.div>
         </div>
     );

@@ -108,6 +108,13 @@ export const SettingsScreen: React.FC = () => {
             </button>
           </div>
         </motion.div>
+
+        {/* Copyright */}
+        <motion.div variants={listItem} className="text-center pb-8">
+          <p className="text-xs text-gray-400">
+            © 2026 SML
+          </p>
+        </motion.div>
       </motion.div>
     </div>
   );
