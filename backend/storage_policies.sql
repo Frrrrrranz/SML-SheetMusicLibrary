@@ -6,7 +6,7 @@
 drop policy if exists "Public Access Sheet Music" on storage.objects;
 drop policy if exists "Admin can upload sheet music" on storage.objects;
 drop policy if exists "Admin can delete sheet music" on storage.objects;
-create policy "Public Access Sheet Music" on storage.objects for select using ( bucket_id = 'sheet-music' );
+create policy "Authenticated Access Sheet Music" on storage.objects for select using ( bucket_id = 'sheet-music' AND auth.uid() is not null );
 
 create policy "Admin can upload sheet music"
 on storage.objects for insert
@@ -22,7 +22,7 @@ drop policy if exists "Public Access Avatars" on storage.objects;
 drop policy if exists "Admin can upload avatars" on storage.objects;
 drop policy if exists "Admin can update avatars" on storage.objects;
 drop policy if exists "Admin can delete avatars" on storage.objects;
-create policy "Public Access Avatars" on storage.objects for select using ( bucket_id = 'avatars' );
+create policy "Authenticated Access Avatars" on storage.objects for select using ( bucket_id = 'avatars' AND auth.uid() is not null );
 
 create policy "Admin can upload avatars"
 on storage.objects for insert
@@ -41,7 +41,7 @@ using ( bucket_id = 'avatars' AND public.is_admin() );
 drop policy if exists "Public Access Recordings" on storage.objects;
 drop policy if exists "Admin can upload recordings" on storage.objects;
 drop policy if exists "Admin can delete recordings" on storage.objects;
-create policy "Public Access Recordings" on storage.objects for select using ( bucket_id = 'recordings' );
+create policy "Authenticated Access Recordings" on storage.objects for select using ( bucket_id = 'recordings' AND auth.uid() is not null );
 
 create policy "Admin can upload recordings"
 on storage.objects for insert

@@ -44,7 +44,7 @@ begin
   );
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 -- 7. 创建触发器：新用户注册时触发
 drop trigger if exists on_auth_user_created on auth.users;
@@ -59,7 +59,7 @@ begin
   new.updated_at = now();
   return new;
 end;
-$$ language plpgsql;
+$$ language plpgsql set search_path = public;
 
 drop trigger if exists on_profiles_updated on profiles;
 create trigger on_profiles_updated

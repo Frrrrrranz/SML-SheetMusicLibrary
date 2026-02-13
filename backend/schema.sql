@@ -50,14 +50,14 @@ begin
     where id = auth.uid() and role = 'admin'
   );
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 -- Create policies (仅管理员可修改)
 drop policy if exists "Public Access Composers" on composers;
 drop policy if exists "Admin only Composers Insert" on composers;
 drop policy if exists "Admin only Composers Update" on composers;
 drop policy if exists "Admin only Composers Delete" on composers;
-create policy "Public Access Composers" on composers for select using (true);
+create policy "Authenticated Access Composers" on composers for select using (auth.uid() is not null);
 create policy "Admin only Composers Insert" on composers for insert with check (public.is_admin());
 create policy "Admin only Composers Update" on composers for update using (public.is_admin());
 create policy "Admin only Composers Delete" on composers for delete using (public.is_admin());
@@ -66,7 +66,7 @@ drop policy if exists "Public Access Works" on works;
 drop policy if exists "Admin only Works Insert" on works;
 drop policy if exists "Admin only Works Update" on works;
 drop policy if exists "Admin only Works Delete" on works;
-create policy "Public Access Works" on works for select using (true);
+create policy "Authenticated Access Works" on works for select using (auth.uid() is not null);
 create policy "Admin only Works Insert" on works for insert with check (public.is_admin());
 create policy "Admin only Works Update" on works for update using (public.is_admin());
 create policy "Admin only Works Delete" on works for delete using (public.is_admin());
@@ -75,7 +75,7 @@ drop policy if exists "Public Access Recordings" on recordings;
 drop policy if exists "Admin only Recordings Insert" on recordings;
 drop policy if exists "Admin only Recordings Update" on recordings;
 drop policy if exists "Admin only Recordings Delete" on recordings;
-create policy "Public Access Recordings" on recordings for select using (true);
+create policy "Authenticated Access Recordings" on recordings for select using (auth.uid() is not null);
 create policy "Admin only Recordings Insert" on recordings for insert with check (public.is_admin());
 create policy "Admin only Recordings Update" on recordings for update using (public.is_admin());
 create policy "Admin only Recordings Delete" on recordings for delete using (public.is_admin());
