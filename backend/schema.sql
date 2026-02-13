@@ -52,30 +52,53 @@ begin
 end;
 $$ language plpgsql security definer set search_path = public;
 
--- Create policies (仅管理员可修改)
-drop policy if exists "Public Access Composers" on composers;
-drop policy if exists "Admin only Composers Insert" on composers;
-drop policy if exists "Admin only Composers Update" on composers;
-drop policy if exists "Admin only Composers Delete" on composers;
-create policy "Authenticated Access Composers" on composers for select using (auth.uid() is not null);
-create policy "Admin only Composers Insert" on composers for insert with check (public.is_admin());
-create policy "Admin only Composers Update" on composers for update using (public.is_admin());
-create policy "Admin only Composers Delete" on composers for delete using (public.is_admin());
+-- 1. 清理 Composers (包含冗余策略)
+DROP POLICY IF EXISTS "Enable all access for all users" ON composers;
+DROP POLICY IF EXISTS "Enable read access for all" ON composers;
+DROP POLICY IF EXISTS "Enable insert for authenticated users" ON composers;
+DROP POLICY IF EXISTS "Enable update for authenticated users" ON composers;
+DROP POLICY IF EXISTS "Enable delete for admin" ON composers;
+DROP POLICY IF EXISTS "Public Access Composers" ON composers;
+DROP POLICY IF EXISTS "Admin only Composers Insert" ON composers;
+DROP POLICY IF EXISTS "Admin only Composers Update" ON composers;
+DROP POLICY IF EXISTS "Admin only Composers Delete" ON composers;
+DROP POLICY IF EXISTS "Authenticated Access Composers" ON composers;
 
-drop policy if exists "Public Access Works" on works;
-drop policy if exists "Admin only Works Insert" on works;
-drop policy if exists "Admin only Works Update" on works;
-drop policy if exists "Admin only Works Delete" on works;
-create policy "Authenticated Access Works" on works for select using (auth.uid() is not null);
-create policy "Admin only Works Insert" on works for insert with check (public.is_admin());
-create policy "Admin only Works Update" on works for update using (public.is_admin());
-create policy "Admin only Works Delete" on works for delete using (public.is_admin());
+CREATE POLICY "Authenticated Access Composers" ON composers FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "Admin only Composers Insert" ON composers FOR INSERT WITH CHECK (public.is_admin());
+CREATE POLICY "Admin only Composers Update" ON composers FOR UPDATE USING (public.is_admin());
+CREATE POLICY "Admin only Composers Delete" ON composers FOR DELETE USING (public.is_admin());
 
-drop policy if exists "Public Access Recordings" on recordings;
-drop policy if exists "Admin only Recordings Insert" on recordings;
-drop policy if exists "Admin only Recordings Update" on recordings;
-drop policy if exists "Admin only Recordings Delete" on recordings;
-create policy "Authenticated Access Recordings" on recordings for select using (auth.uid() is not null);
-create policy "Admin only Recordings Insert" on recordings for insert with check (public.is_admin());
-create policy "Admin only Recordings Update" on recordings for update using (public.is_admin());
-create policy "Admin only Recordings Delete" on recordings for delete using (public.is_admin());
+-- 2. 清理 Works (包含冗余策略)
+DROP POLICY IF EXISTS "Enable all access for all users" ON works;
+DROP POLICY IF EXISTS "Enable read access for all" ON works;
+DROP POLICY IF EXISTS "Enable insert for authenticated users" ON works;
+DROP POLICY IF EXISTS "Enable update for authenticated users" ON works;
+DROP POLICY IF EXISTS "Enable delete for admin" ON works;
+DROP POLICY IF EXISTS "Public Access Works" ON works;
+DROP POLICY IF EXISTS "Admin only Works Insert" ON works;
+DROP POLICY IF EXISTS "Admin only Works Update" ON works;
+DROP POLICY IF EXISTS "Admin only Works Delete" ON works;
+DROP POLICY IF EXISTS "Authenticated Access Works" ON works;
+
+CREATE POLICY "Authenticated Access Works" ON works FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "Admin only Works Insert" ON works FOR INSERT WITH CHECK (public.is_admin());
+CREATE POLICY "Admin only Works Update" ON works FOR UPDATE USING (public.is_admin());
+CREATE POLICY "Admin only Works Delete" ON works FOR DELETE USING (public.is_admin());
+
+-- 3. 清理 Recordings (包含冗余策略)
+DROP POLICY IF EXISTS "Enable all access for all users" ON recordings;
+DROP POLICY IF EXISTS "Enable read access for all" ON recordings;
+DROP POLICY IF EXISTS "Enable insert for authenticated users" ON recordings;
+DROP POLICY IF EXISTS "Enable update for authenticated users" ON recordings;
+DROP POLICY IF EXISTS "Enable delete for admin" ON recordings;
+DROP POLICY IF EXISTS "Public Access Recordings" ON recordings;
+DROP POLICY IF EXISTS "Admin only Recordings Insert" ON recordings;
+DROP POLICY IF EXISTS "Admin only Recordings Update" ON recordings;
+DROP POLICY IF EXISTS "Admin only Recordings Delete" ON recordings;
+DROP POLICY IF EXISTS "Authenticated Access Recordings" ON recordings;
+
+CREATE POLICY "Authenticated Access Recordings" ON recordings FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "Admin only Recordings Insert" ON recordings FOR INSERT WITH CHECK (public.is_admin());
+CREATE POLICY "Admin only Recordings Update" ON recordings FOR UPDATE USING (public.is_admin());
+CREATE POLICY "Admin only Recordings Delete" ON recordings FOR DELETE USING (public.is_admin());
