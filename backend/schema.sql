@@ -63,10 +63,12 @@ DROP POLICY IF EXISTS "Admin only Composers Insert" ON composers;
 DROP POLICY IF EXISTS "Admin only Composers Update" ON composers;
 DROP POLICY IF EXISTS "Admin only Composers Delete" ON composers;
 DROP POLICY IF EXISTS "Authenticated Access Composers" ON composers;
+DROP POLICY IF EXISTS "Authenticated Composers Insert" ON composers;
+DROP POLICY IF EXISTS "Authenticated Composers Update" ON composers;
 
 CREATE POLICY "Authenticated Access Composers" ON composers FOR SELECT USING (auth.uid() IS NOT NULL);
-CREATE POLICY "Admin only Composers Insert" ON composers FOR INSERT WITH CHECK (public.is_admin());
-CREATE POLICY "Admin only Composers Update" ON composers FOR UPDATE USING (public.is_admin());
+CREATE POLICY "Authenticated Composers Insert" ON composers FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "Authenticated Composers Update" ON composers FOR UPDATE USING (auth.uid() IS NOT NULL);
 CREATE POLICY "Admin only Composers Delete" ON composers FOR DELETE USING (public.is_admin());
 
 -- 2. 清理 Works (包含冗余策略)
@@ -80,10 +82,12 @@ DROP POLICY IF EXISTS "Admin only Works Insert" ON works;
 DROP POLICY IF EXISTS "Admin only Works Update" ON works;
 DROP POLICY IF EXISTS "Admin only Works Delete" ON works;
 DROP POLICY IF EXISTS "Authenticated Access Works" ON works;
+DROP POLICY IF EXISTS "Authenticated Works Insert" ON works;
+DROP POLICY IF EXISTS "Authenticated Works Update" ON works;
 
 CREATE POLICY "Authenticated Access Works" ON works FOR SELECT USING (auth.uid() IS NOT NULL);
-CREATE POLICY "Admin only Works Insert" ON works FOR INSERT WITH CHECK (public.is_admin());
-CREATE POLICY "Admin only Works Update" ON works FOR UPDATE USING (public.is_admin());
+CREATE POLICY "Authenticated Works Insert" ON works FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "Authenticated Works Update" ON works FOR UPDATE USING (auth.uid() IS NOT NULL);
 CREATE POLICY "Admin only Works Delete" ON works FOR DELETE USING (public.is_admin());
 
 -- 3. 清理 Recordings (包含冗余策略)
@@ -97,8 +101,10 @@ DROP POLICY IF EXISTS "Admin only Recordings Insert" ON recordings;
 DROP POLICY IF EXISTS "Admin only Recordings Update" ON recordings;
 DROP POLICY IF EXISTS "Admin only Recordings Delete" ON recordings;
 DROP POLICY IF EXISTS "Authenticated Access Recordings" ON recordings;
+DROP POLICY IF EXISTS "Authenticated Recordings Insert" ON recordings;
+DROP POLICY IF EXISTS "Authenticated Recordings Update" ON recordings;
 
 CREATE POLICY "Authenticated Access Recordings" ON recordings FOR SELECT USING (auth.uid() IS NOT NULL);
-CREATE POLICY "Admin only Recordings Insert" ON recordings FOR INSERT WITH CHECK (public.is_admin());
-CREATE POLICY "Admin only Recordings Update" ON recordings FOR UPDATE USING (public.is_admin());
+CREATE POLICY "Authenticated Recordings Insert" ON recordings FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "Authenticated Recordings Update" ON recordings FOR UPDATE USING (auth.uid() IS NOT NULL);
 CREATE POLICY "Admin only Recordings Delete" ON recordings FOR DELETE USING (public.is_admin());
