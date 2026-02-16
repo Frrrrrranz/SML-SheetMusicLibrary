@@ -15,6 +15,7 @@ import { Composer } from './types';
 import { pageTransition } from './utils/animations';
 import { SplashScreen } from './screens/SplashScreen';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { ConsentGate } from './components/ConsentBanner';
 
 
 // 主应用内容（需要登录）
@@ -195,11 +196,13 @@ const App: React.FC = () => {
     <>
       <SplashScreen />
       <LanguageProvider>
-        <AuthProvider>
-          <HashRouter>
-            <AuthGuard />
-          </HashRouter>
-        </AuthProvider>
+        <ConsentGate>
+          <AuthProvider>
+            <HashRouter>
+              <AuthGuard />
+            </HashRouter>
+          </AuthProvider>
+        </ConsentGate>
       </LanguageProvider>
       <Analytics />
     </>

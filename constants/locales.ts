@@ -75,6 +75,12 @@ export const translations = {
                 agree: '我已阅读并同意',
                 cancel: '取消',
             },
+            consent: {
+                title: '隐私政策与使用条款',
+                notice: '本站资源（包括乐谱及录音）由用户上传，仅供个人学习、练习与研究使用。禁止任何形式的商业用途或非法传播。',
+                dataCollection: '我们会收集您的邮箱地址用于账户注册与身份验证。您的数据将被安全存储，不会出售或分享给第三方。',
+                agree: '我同意并继续',
+            },
         },
         search: {
             title: '搜索',
@@ -178,6 +184,12 @@ export const translations = {
                 warning: 'By continuing to browse/play, you agree to comply with relevant laws and regulations and assume all associated risks.',
                 agree: 'I Read and Agree',
                 cancel: 'Cancel',
+            },
+            consent: {
+                title: 'Privacy Policy & Terms',
+                notice: 'Resources on this site (including sheet music and recordings) are uploaded by users and are intended for personal study, practice, and research only. Any form of commercial use or illegal distribution is strictly prohibited.',
+                dataCollection: 'We collect your email address for account registration and authentication. Your data is stored securely and will not be sold or shared with third parties.',
+                agree: 'I Agree & Continue',
             },
         },
         search: {
