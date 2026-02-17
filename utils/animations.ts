@@ -104,27 +104,26 @@ export const scaleIn: Variants = {
 };
 
 // 从底部滑入（适合 Bottom Sheet）
+// NOTE: 纯 y 位移动画，不含 opacity 变化以避免重绘，GPU 加速更高效
 export const slideUp: Variants = {
     hidden: {
         y: '100%',
-        opacity: 0.5,
     },
     visible: {
         y: 0,
-        opacity: 1,
         transition: {
             type: 'spring',
-            stiffness: 300,
-            damping: 30,
+            stiffness: 260,
+            damping: 28,
+            mass: 0.8,
         },
     },
     exit: {
         y: '100%',
-        opacity: 0.5,
         transition: {
             type: 'tween',
-            ease: 'easeIn',
-            duration: 0.25,
+            ease: [0.32, 0, 0.67, 0],
+            duration: 0.3,
         },
     },
 };

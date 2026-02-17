@@ -208,7 +208,7 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, isL
         variant="bottom"
         title={t.composers.add}
       >
-        <div className="px-6 pt-6 pb-32">
+        <div className="px-6 pt-6 pb-6">
           {/* Avatar Upload */}
           <div className="flex justify-center mb-8">
             <input
@@ -264,7 +264,8 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, isL
             </div>
           </div>
 
-          <div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-background via-background/95 to-transparent px-6 pb-8 pt-12 z-20">
+          {/* NOTE: 底部按钮使用 sticky 定位，在 Modal flex 容器内正常工作（fixed 在 transform 容器内会失效） */}
+          <div className="sticky bottom-0 left-0 w-full bg-gradient-to-t from-background via-background/95 to-transparent px-0 pb-8 pt-12 mt-8">
             <button
               onClick={handleSave}
               disabled={!name || !period || isUploading}
