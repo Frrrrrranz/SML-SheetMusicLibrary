@@ -3,6 +3,7 @@ export const translations = {
         navigation: {
             composers: '库',
             search: '搜索',
+            aiChat: 'AI 助手',
             settings: '设置',
         },
         auth: {
@@ -100,6 +101,17 @@ export const translations = {
                 work: '作品匹配',
             }
         },
+        aiChat: {
+            title: 'AI',
+            greeting: '你好！可以为你解答关于作曲家、乐谱、音乐理论和音乐历史等问题。',
+            placeholder: '输入你的音乐问题...',
+            error: '抱歉，AI 服务暂时不可用，请稍后再试。',
+            suggestionsLabel: '试试这些问题',
+            quick1: '介绍一下巴赫的生平',
+            quick2: '什么是奏鸣曲式？',
+            quick3: '浪漫主义时期有哪些代表作曲家？',
+            quick4: '贝多芬的月光奏鸣曲的创作背景是什么？',
+        },
         pwa: {
             title: '添加到主屏幕',
             description: '将 SML 添加到主屏幕，获得更佳的应用体验。',
@@ -113,6 +125,7 @@ export const translations = {
         navigation: {
             composers: 'Library',
             search: 'Search',
+            aiChat: 'AI Chat',
             settings: 'Settings',
         },
         auth: {
@@ -209,6 +222,17 @@ export const translations = {
                 composer: 'Composer',
                 work: 'Work Match',
             }
+        },
+        aiChat: {
+            title: 'AI',
+            greeting: "Ask me anything about composers, sheet music, music theory, and music history.",
+            placeholder: 'Ask a music question...',
+            error: 'Sorry, the AI service is temporarily unavailable. Please try again later.',
+            suggestionsLabel: 'Try these questions',
+            quick1: 'Tell me about Bach\'s life',
+            quick2: 'What is sonata form?',
+            quick3: 'Who are the key Romantic era composers?',
+            quick4: 'What is the story behind Beethoven\'s Moonlight Sonata?',
         },
         pwa: {
             title: 'Add to Home Screen',

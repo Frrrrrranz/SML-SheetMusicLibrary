@@ -8,6 +8,7 @@ import { ComposersScreen } from './screens/ComposersScreen';
 import { ComposerDetailScreen } from './screens/ComposerDetailScreen';
 import { SearchScreen } from './screens/SearchScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { AiChatScreen } from './screens/AiChatScreen';
 import { AuthScreen } from './screens/AuthScreen';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
@@ -107,6 +108,10 @@ const AppContent: React.FC = () => {
               <Route
                 path="/search"
                 element={<SearchScreen composers={composers} />}
+              />
+              <Route
+                path="/ai-chat"
+                element={<AiChatScreen />}
               />
               <Route
                 path="/settings"
