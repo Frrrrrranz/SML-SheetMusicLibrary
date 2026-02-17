@@ -19,7 +19,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentPath, onNavigate })
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 z-50 w-full border-t border-gray-200 bg-white/95 backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-[480px] border-t border-gray-200 bg-white/95 backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
       <div className="flex h-16 items-center justify-around px-2">
         {navItems.map((item) => {
           // Simple active check: strictly equal or (for root) strictly root

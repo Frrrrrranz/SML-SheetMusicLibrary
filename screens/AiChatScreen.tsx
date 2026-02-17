@@ -237,8 +237,8 @@ export const AiChatScreen: React.FC = () => {
             {messages.length === 0 ? renderWelcome() : renderMessages()}
 
             {/* NOTE: 底部输入区 - 使用与搜索框一致的样式 */}
-            <div className="fixed bottom-16 left-0 right-0 z-20 bg-background/80 backdrop-blur-2xl backdrop-saturate-150 border-t border-gray-100/50 pb-[env(safe-area-inset-bottom)]">
-                <div className="max-w-[480px] mx-auto flex items-center gap-2.5 px-4 py-2.5">
+            <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-20 bg-background/80 backdrop-blur-2xl backdrop-saturate-150 border-t border-gray-100/50 pb-[env(safe-area-inset-bottom)]">
+                <div className="flex items-center gap-2.5 px-4 py-2.5">
                     <input
                         ref={inputRef}
                         type="text"
