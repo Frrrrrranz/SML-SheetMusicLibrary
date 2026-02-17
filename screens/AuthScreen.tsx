@@ -148,36 +148,39 @@ export const AuthScreen: React.FC = () => {
                     variants={fadeInUp}
                     initial="hidden"
                     animate="visible"
+                    layout
                 >
                     {/* 标题带 AnimatePresence 切换过渡 */}
-                    <AnimatePresence mode="wait">
-                        <motion.h2
-                            key={mode}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="text-2xl font-bold font-serif text-textMain mb-8 text-center"
-                        >
-                            {mode === 'login'
-                                ? (isFirstVisit ? t.auth.welcome : t.auth.welcomeBack)
-                                : t.auth.join
-                            }
-                        </motion.h2>
-                    </AnimatePresence>
+                    <div className="h-10 mb-8 overflow-hidden relative">
+                        <AnimatePresence mode="wait" initial={false}>
+                            <motion.h2
+                                key={mode}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.2 }}
+                                className="text-2xl font-bold font-serif text-textMain text-center absolute w-full left-0 top-0"
+                            >
+                                {mode === 'login'
+                                    ? (isFirstVisit ? t.auth.welcome : t.auth.welcomeBack)
+                                    : t.auth.join
+                                }
+                            </motion.h2>
+                        </AnimatePresence>
+                    </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="flex flex-col">
                         {/* Nickname (Register Only) - 带过渡动画 */}
-                        <AnimatePresence>
+                        <AnimatePresence initial={false}>
                             {mode === 'register' && (
                                 <motion.div
-                                    className="relative"
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.25, ease: 'easeInOut' }}
+                                    className="relative overflow-hidden"
+                                    initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                    animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
+                                    exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
                                 >
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400">
+                                    <div className="absolute left-0 top-3 text-gray-400">
                                         <User size={20} />
                                     </div>
                                     <input
@@ -193,7 +196,7 @@ export const AuthScreen: React.FC = () => {
                         </AnimatePresence>
 
                         {/* Email */}
-                        <div className="relative">
+                        <div className="relative mb-6">
                             <div className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400">
                                 <Mail size={20} />
                             </div>
@@ -209,7 +212,7 @@ export const AuthScreen: React.FC = () => {
                         </div>
 
                         {/* Password */}
-                        <div className="relative">
+                        <div className="relative mb-6">
                             <div className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400">
                                 <Lock size={20} />
                             </div>
@@ -246,10 +249,11 @@ export const AuthScreen: React.FC = () => {
                             type="submit"
                             disabled={loading}
                             whileTap={{ scale: 0.98 }}
+                            layout
                             className={`
                 w-full py-4 rounded-full font-bold text-lg text-white
                 flex items-center justify-center gap-2
-                transition-all
+                transition-colors duration-300
                 ${loading ? 'bg-gray-300 cursor-not-allowed' : 'bg-oldGold hover:bg-[#d4ac26] shadow-lg shadow-oldGold/30'}
               `}
                         >
@@ -260,23 +264,44 @@ export const AuthScreen: React.FC = () => {
                                 </>
                             ) : (
                                 <>
-                                    {mode === 'login' ? t.auth.login : t.auth.register}
-                                    <ArrowRight size={20} />
+                                    <AnimatePresence mode="wait" initial={false}>
+                                        <motion.span
+                                            key={mode}
+                                            initial={{ opacity: 0, x: 10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -10 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="flex items-center gap-2"
+                                        >
+                                            {mode === 'login' ? t.auth.login : t.auth.register}
+                                            <ArrowRight size={20} />
+                                        </motion.span>
+                                    </AnimatePresence>
                                 </>
                             )}
                         </motion.button>
                     </form>
 
                     <div className="mt-8 text-center text-sm">
-                        <span className="text-textSub">
-                            {mode === 'login' ? t.auth.noAccount : t.auth.hasAccount}
-                        </span>
-                        <button
-                            onClick={switchMode}
-                            className="ml-2 text-oldGold font-semibold hover:underline"
-                        >
-                            {mode === 'login' ? t.auth.registerNow : t.auth.backToLogin}
-                        </button>
+                        <AnimatePresence mode="wait" initial={false}>
+                            <motion.div
+                                key={`${mode}-switch-text`}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <span className="text-textSub">
+                                    {mode === 'login' ? t.auth.noAccount : t.auth.hasAccount}
+                                </span>
+                                <button
+                                    onClick={switchMode}
+                                    className="ml-2 text-oldGold font-semibold hover:underline"
+                                >
+                                    {mode === 'login' ? t.auth.registerNow : t.auth.backToLogin}
+                                </button>
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
 
                     {/* Language Switcher */}
