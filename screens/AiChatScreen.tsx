@@ -225,10 +225,7 @@ export const AiChatScreen: React.FC = () => {
                 <h1 className="text-4xl font-bold tracking-tight text-textMain font-serif">
                     {t.aiChat.title}
                 </h1>
-                {/* NOTE: 显示当前使用的 AI 模型 */}
-                <p className="text-xs text-textSub font-sans mt-1 tracking-wide">
-                    qwen-turbo · 通义千问
-                </p>
+
             </header>
             {/* Header 底部渐隐遮罩 */}
             <div className="sticky top-[calc(env(safe-area-inset-top)+6.5rem)] z-20 h-4 bg-gradient-to-b from-background/80 to-transparent pointer-events-none" />
