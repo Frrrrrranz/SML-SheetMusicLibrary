@@ -11,7 +11,7 @@
 
 ## 🛠️ 技术实现
 
-- **前端**：React 19 + TypeScript + Vite + Tailwind CSS
+- **前端**：React 19 + TypeScript + Vite + Framer Motion + Lucide React + React Router
 - **后端**：Supabase (Database & Storage)
 - **AI**：通义千问 (DashScope API)，通过 Supabase Edge Functions 调用
 
