@@ -116,8 +116,19 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, isL
 
       <main className="px-4 py-2">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center pt-32">
-            <Loader2 className="h-10 w-10 animate-spin text-oldGold" />
+          <div className="space-y-0">
+            {/* 骨架屏 — 借鉴 ShipSwift SWShimmer 的微光扫过概念 */}
+            {[0.65, 0.45, 0.55, 0.4].map((nameWidth, i) => (
+              <div key={i} className="flex items-center gap-5 p-4">
+                {/* 圆形头像占位 */}
+                <div className="skeleton-shimmer shrink-0 size-16 !rounded-full" />
+                {/* 文字占位 */}
+                <div className="flex-1 space-y-2.5 border-b border-divider pb-4">
+                  <div className="skeleton-shimmer h-5" style={{ width: `${nameWidth * 100}%` }} />
+                  <div className="skeleton-shimmer h-3.5 w-[40%]" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : composers.length === 0 ? (
           <motion.div

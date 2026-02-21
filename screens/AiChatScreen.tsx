@@ -1,9 +1,70 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Sparkles, User, Loader2, AlertCircle, MessageSquare } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { askMusicQuestion } from '../services/gemini';
 import { staggerContainer, listItem } from '../utils/animations';
+
+// =============================================
+// 打字机 Hook — 借鉴 ShipSwift SWTypewriterText 的逐字呈现概念
+// =============================================
+const useTypewriter = (text: string, speed = 18) => {
+    const [displayedText, setDisplayedText] = useState('');
+    const [isComplete, setIsComplete] = useState(false);
+
+    useEffect(() => {
+        if (!text) {
+            setDisplayedText('');
+            setIsComplete(true);
+            return;
+        }
+
+        setDisplayedText('');
+        setIsComplete(false);
+        let index = 0;
+
+        const timer = setInterval(() => {
+            index++;
+            setDisplayedText(text.slice(0, index));
+            if (index >= text.length) {
+                clearInterval(timer);
+                setIsComplete(true);
+            }
+        }, speed);
+
+        return () => clearInterval(timer);
+    }, [text, speed]);
+
+    return { displayedText, isComplete };
+};
+
+// 打字机气泡 — AI 回复逐字渲染
+const TypewriterBubble: React.FC<{
+    content: string;
+    isError?: boolean;
+    onComplete?: () => void;
+}> = ({ content, isError, onComplete }) => {
+    const { displayedText, isComplete } = useTypewriter(content, isError ? 0 : 18);
+
+    useEffect(() => {
+        if (isComplete && onComplete) onComplete();
+    }, [isComplete, onComplete]);
+
+    return (
+        <>
+            {displayedText.split('\n').map((line, i) => (
+                <React.Fragment key={i}>
+                    {line}
+                    {i < displayedText.split('\n').length - 1 && <br />}
+                </React.Fragment>
+            ))}
+            {/* 闪烁光标 — 打字完成后隐藏 */}
+            {!isComplete && (
+                <span className="inline-block w-[2px] h-[1em] bg-oldGold/60 ml-0.5 align-text-bottom animate-pulse" />
+            )}
+        </>
+    );
+};
 
 // 消息类型定义
 interface ChatMessage {
@@ -28,6 +89,11 @@ export const AiChatScreen: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    // NOTE: 追踪已完成打字的消息，避免重新渲染时重复动画
+    const [typedMessageIds, setTypedMessageIds] = useState<Set<string>>(new Set());
+    const markTyped = useCallback((id: string) => {
+        setTypedMessageIds(prev => new Set(prev).add(id));
+    }, []);
 
     // 快捷问题
     const quickQuestions = [
@@ -180,12 +246,21 @@ export const AiChatScreen: React.FC = () => {
                                     ? 'bg-red-50/80 text-red-700 border border-red-100 rounded-2xl rounded-tl-md font-sans'
                                     : 'bg-white text-textMain border border-gray-100 rounded-2xl rounded-tl-md shadow-sm font-serif'
                                 }`}>
-                                {msg.content.split('\n').map((line, i) => (
-                                    <React.Fragment key={i}>
-                                        {line}
-                                        {i < msg.content.split('\n').length - 1 && <br />}
-                                    </React.Fragment>
-                                ))}
+                                {/* AI 回复使用打字机效果，用户消息直接显示 */}
+                                {msg.role === 'assistant' && !typedMessageIds.has(msg.id) ? (
+                                    <TypewriterBubble
+                                        content={msg.content}
+                                        isError={msg.isError}
+                                        onComplete={() => markTyped(msg.id)}
+                                    />
+                                ) : (
+                                    msg.content.split('\n').map((line, i) => (
+                                        <React.Fragment key={i}>
+                                            {line}
+                                            {i < msg.content.split('\n').length - 1 && <br />}
+                                        </React.Fragment>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </motion.div>
