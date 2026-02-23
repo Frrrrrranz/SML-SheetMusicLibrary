@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Loader2, CheckCircle, AlertCircle, Shield, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { fadeInUp, fadeInDown } from '../utils/animations';
@@ -19,6 +19,8 @@ export const AuthScreen: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [showVerificationMessage, setShowVerificationMessage] = useState(false);
     const [isFirstVisit, setIsFirstVisit] = useState(false);
+    const [consentChecked, setConsentChecked] = useState(false);
+    const [showPolicyModal, setShowPolicyModal] = useState(false);
 
     // 检查是否是首次访问
     React.useEffect(() => {
@@ -33,6 +35,12 @@ export const AuthScreen: React.FC = () => {
         e.preventDefault();
         setError(null);
         setLoading(true);
+        // NOTE: 提交前校验隐私政策勾选状态
+        if (!consentChecked) {
+            setError(t.auth.consentRequired);
+            setLoading(false);
+            return;
+        }
 
         try {
             if (mode === 'login') {
@@ -76,6 +84,7 @@ export const AuthScreen: React.FC = () => {
         setMode(mode === 'login' ? 'register' : 'login');
         setError(null);
         setShowVerificationMessage(false);
+        setConsentChecked(false);
     };
 
     // 验证邮件发送成功提示
@@ -228,6 +237,44 @@ export const AuthScreen: React.FC = () => {
                             />
                         </div>
 
+                        {/* 隐私政策勾选框 */}
+                        <div className="flex items-start gap-2.5 mb-6 mt-1">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setConsentChecked(!consentChecked);
+                                    // NOTE: 切换勾选状态时清除之前的相关错误
+                                    if (error === t.auth.consentRequired) setError(null);
+                                }}
+                                className={`mt-0.5 w-[18px] h-[18px] min-w-[18px] rounded border-2 flex items-center justify-center transition-all duration-200 ${consentChecked
+                                        ? 'bg-oldGold border-oldGold'
+                                        : 'border-gray-300 hover:border-oldGold/50'
+                                    }`}
+                            >
+                                {consentChecked && (
+                                    <motion.svg
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        className="w-3 h-3 text-white"
+                                        viewBox="0 0 12 12"
+                                        fill="none"
+                                    >
+                                        <path d="M2 6L5 9L10 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </motion.svg>
+                                )}
+                            </button>
+                            <span className="text-xs text-textSub leading-relaxed">
+                                {t.auth.consentLabel}
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPolicyModal(true)}
+                                    className="text-oldGold font-medium hover:underline ml-0.5"
+                                >
+                                    {t.auth.consentLink}
+                                </button>
+                            </span>
+                        </div>
+
                         {/* Error Message - 带淡入动画 */}
                         <AnimatePresence>
                             {error && (
@@ -338,6 +385,67 @@ export const AuthScreen: React.FC = () => {
             >
                 © 2026 SML
             </motion.div>
+
+            {/* 隐私政策详情 Modal */}
+            <AnimatePresence>
+                {showPolicyModal && (
+                    <motion.div
+                        className="fixed inset-0 z-50 flex items-end justify-center"
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                    >
+                        {/* 背景遮罩 */}
+                        <motion.div
+                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowPolicyModal(false)}
+                        />
+                        {/* 弹窗内容 */}
+                        <motion.div
+                            className="relative z-10 w-full max-w-[480px] bg-background rounded-t-3xl p-6 pb-10 max-h-[75vh] overflow-y-auto"
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+                        >
+                            {/* Header */}
+                            <div className="flex items-center justify-between mb-5">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-9 h-9 rounded-xl bg-oldGold/10 flex items-center justify-center">
+                                        <Shield className="w-4.5 h-4.5 text-oldGold" />
+                                    </div>
+                                    <h3 className="text-lg font-bold font-serif text-textMain">
+                                        {t.common.consent.title}
+                                    </h3>
+                                </div>
+                                <button
+                                    onClick={() => setShowPolicyModal(false)}
+                                    className="w-8 h-8 rounded-full flex items-center justify-center text-textSub hover:bg-gray-100 transition-colors"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            {/* 政策内容 */}
+                            <div className="space-y-4">
+                                {t.common.consent.sections.map((section, index) => (
+                                    <div key={index}>
+                                        <h4 className="text-sm font-semibold text-textMain mb-1.5">
+                                            {section.heading}
+                                        </h4>
+                                        <p className="text-sm text-textSub leading-relaxed whitespace-pre-line">
+                                            {section.content}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

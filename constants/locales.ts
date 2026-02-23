@@ -31,6 +31,9 @@ export const translations = {
                 passwordTooShort: '密码至少需要 6 个字符',
                 genericError: '操作失败，请重试',
             },
+            consentRequired: '请先同意隐私政策与使用条款',
+            consentLabel: '我已阅读并同意',
+            consentLink: '《隐私政策与使用条款》',
         },
         composers: {
             title: '作曲家',
@@ -78,9 +81,24 @@ export const translations = {
             },
             consent: {
                 title: '隐私政策与使用条款',
-                notice: '本站资源（包括乐谱及录音）由用户上传，仅供个人学习、练习与研究使用。禁止任何形式的商业用途或非法传播。',
-                dataCollection: '我们会收集您的邮箱地址用于账户注册与身份验证。您的数据将被安全存储，不会出售或分享给第三方。',
-                agree: '我同意并继续',
+                sections: [
+                    {
+                        heading: '1. 资源声明',
+                        content: '本站资源（包括乐谱及录音）由用户上传，仅供个人学习、练习与研究使用。禁止任何形式的商业用途或非法传播。',
+                    },
+                    {
+                        heading: '2. 信息收集与使用',
+                        content: '• 账号信息：我们收集您的邮箱地址和昵称，用于注册与身份验证。\n• 上传内容：您上传的乐谱、头像和录音文件存储在安全的云服务中。\n• AI 对话：您向 AI 助手提出的问题将发送至第三方 AI 服务处理，我们会记录调用频次以进行速率限制。\n• 匿名统计：我们使用 Vercel Analytics 收集匿名访问数据以改善服务。',
+                    },
+                    {
+                        heading: '3. 数据安全',
+                        content: '您的密码经过加密处理，数据安全存储，不会出售或分享给无关第三方。',
+                    },
+                    {
+                        heading: '4. 本地存储',
+                        content: '我们使用浏览器本地存储（localStorage）保存语言偏好等设置，这些数据不会上传至服务器。',
+                    },
+                ],
             },
         },
         search: {
@@ -153,6 +171,9 @@ export const translations = {
                 passwordTooShort: 'Password should be at least 6 characters',
                 genericError: 'Operation failed, please try again',
             },
+            consentRequired: 'Please agree to the Privacy Policy & Terms first',
+            consentLabel: 'I have read and agree to the',
+            consentLink: 'Privacy Policy & Terms',
         },
         composers: {
             title: 'Composers',
@@ -200,9 +221,24 @@ export const translations = {
             },
             consent: {
                 title: 'Privacy Policy & Terms',
-                notice: 'Resources on this site (including sheet music and recordings) are uploaded by users and are intended for personal study, practice, and research only. Any form of commercial use or illegal distribution is strictly prohibited.',
-                dataCollection: 'We collect your email address for account registration and authentication. Your data is stored securely and will not be sold or shared with third parties.',
-                agree: 'I Agree & Continue',
+                sections: [
+                    {
+                        heading: '1. Content Disclaimer',
+                        content: 'Resources on this site (including sheet music and recordings) are uploaded by users and are intended for personal study, practice, and research only. Commercial use or unauthorized distribution is strictly prohibited.',
+                    },
+                    {
+                        heading: '2. Information We Collect',
+                        content: '• Account Info: We collect your email and nickname for registration and authentication.\n• Uploaded Content: Your sheet music, avatars, and recordings are stored securely in the cloud.\n• AI Chat: Questions sent to the AI assistant are processed by a third-party AI service. We log usage frequency for rate limiting.\n• Analytics: We use Vercel Analytics to collect anonymous usage data to improve our service.',
+                    },
+                    {
+                        heading: '3. Data Security',
+                        content: 'Your password is encrypted. Your data is stored securely and will not be sold or shared with unrelated third parties.',
+                    },
+                    {
+                        heading: '4. Local Storage',
+                        content: 'We use browser localStorage to save preferences like language settings. This data is not uploaded to our servers.',
+                    },
+                ],
             },
         },
         search: {
