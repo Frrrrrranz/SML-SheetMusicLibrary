@@ -247,8 +247,8 @@ export const AuthScreen: React.FC = () => {
                                     if (error === t.auth.consentRequired) setError(null);
                                 }}
                                 className={`mt-0.5 w-[18px] h-[18px] min-w-[18px] rounded border-2 flex items-center justify-center transition-all duration-200 ${consentChecked
-                                        ? 'bg-oldGold border-oldGold'
-                                        : 'border-gray-300 hover:border-oldGold/50'
+                                    ? 'bg-oldGold border-oldGold'
+                                    : 'border-gray-300 hover:border-oldGold/50'
                                     }`}
                             >
                                 {consentChecked && (
@@ -386,38 +386,36 @@ export const AuthScreen: React.FC = () => {
                 © 2026 SML
             </motion.div>
 
-            {/* 隐私政策详情 Modal */}
+            {/* 隐私政策详情 Modal - 居中弹窗，响应式适配手机/桌面 */}
             <AnimatePresence>
                 {showPolicyModal && (
                     <motion.div
-                        className="fixed inset-0 z-50 flex items-end justify-center"
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
+                        className="fixed inset-0 z-50 flex items-center justify-center px-4"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
                     >
                         {/* 背景遮罩 */}
-                        <motion.div
-                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                        <div
+                            className="absolute inset-0 bg-black/40"
                             onClick={() => setShowPolicyModal(false)}
                         />
-                        {/* 弹窗内容 */}
+                        {/* 弹窗内容 - 手机端紧凑，桌面端更宽 */}
                         <motion.div
-                            className="relative z-10 w-full max-w-[480px] bg-background rounded-t-3xl p-6 pb-10 max-h-[75vh] overflow-y-auto"
-                            initial={{ y: '100%' }}
-                            animate={{ y: 0 }}
-                            exit={{ y: '100%' }}
-                            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+                            className="relative z-10 w-full max-w-sm sm:max-w-md bg-background rounded-2xl p-5 sm:p-6 max-h-[70vh] overflow-y-auto shadow-2xl"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.2, ease: 'easeOut' }}
                         >
                             {/* Header */}
-                            <div className="flex items-center justify-between mb-5">
+                            <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-2.5">
                                     <div className="w-9 h-9 rounded-xl bg-oldGold/10 flex items-center justify-center">
-                                        <Shield className="w-4.5 h-4.5 text-oldGold" />
+                                        <Shield className="w-4 h-4 text-oldGold" />
                                     </div>
-                                    <h3 className="text-lg font-bold font-serif text-textMain">
+                                    <h3 className="text-base sm:text-lg font-bold font-serif text-textMain">
                                         {t.common.consent.title}
                                     </h3>
                                 </div>
@@ -430,13 +428,13 @@ export const AuthScreen: React.FC = () => {
                             </div>
 
                             {/* 政策内容 */}
-                            <div className="space-y-4">
+                            <div className="space-y-3.5">
                                 {t.common.consent.sections.map((section, index) => (
                                     <div key={index}>
-                                        <h4 className="text-sm font-semibold text-textMain mb-1.5">
+                                        <h4 className="text-sm font-semibold text-textMain mb-1">
                                             {section.heading}
                                         </h4>
-                                        <p className="text-sm text-textSub leading-relaxed whitespace-pre-line">
+                                        <p className="text-xs sm:text-sm text-textSub leading-relaxed whitespace-pre-line">
                                             {section.content}
                                         </p>
                                     </div>
