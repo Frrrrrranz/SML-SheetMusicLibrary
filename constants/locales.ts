@@ -74,7 +74,7 @@ export const translations = {
             chinese: '中文',
             copyright: {
                 title: '版权与免责声明',
-                notice: '本站资源（包括乐谱及录音）由用户上传，仅供个人学习、练习与研究使用。禁止任何形式的商业用途或非法传播。',
+                notice: '本站资源（包括乐谱及录音）由用户上传，仅供个人学习、练习与研究使用。禁止任何形式的商业用途或传播。',
                 warning: '继续浏览/播放即表示您同意遵守相关法律法规并自行承担相关风险。',
                 agree: '我已阅读并同意',
                 cancel: '取消',
@@ -84,7 +84,7 @@ export const translations = {
                 sections: [
                     {
                         heading: '1. 资源声明',
-                        content: '本站资源（包括乐谱及录音）由用户上传，仅供个人学习、练习与研究使用。禁止任何形式的商业用途或非法传播。',
+                        content: '本站资源（包括乐谱及录音）由用户上传，仅供个人学习、练习与研究使用。禁止任何形式的商业用途或传播。',
                     },
                     {
                         heading: '2. 信息收集与使用',
@@ -214,7 +214,7 @@ export const translations = {
             chinese: 'Chinese',
             copyright: {
                 title: 'Copyright & Disclaimer',
-                notice: 'Resources on this site (including sheet music and recordings) are uploaded by users and are intended for personal study, practice, and research only. Any form of commercial use or illegal distribution is strictly prohibited.',
+                notice: 'Resources on this site (including sheet music and recordings) are uploaded by users and are intended for personal study, practice, and research only. Any form of commercial use or distribution is strictly prohibited.',
                 warning: 'By continuing to browse/play, you agree to comply with relevant laws and regulations and assume all associated risks.',
                 agree: 'I Read and Agree',
                 cancel: 'Cancel',
@@ -224,7 +224,7 @@ export const translations = {
                 sections: [
                     {
                         heading: '1. Content Disclaimer',
-                        content: 'Resources on this site (including sheet music and recordings) are uploaded by users and are intended for personal study, practice, and research only. Commercial use or unauthorized distribution is strictly prohibited.',
+                        content: 'Resources on this site (including sheet music and recordings) are uploaded by users and are intended for personal study, practice, and research only. Commercial use or distribution is strictly prohibited.',
                     },
                     {
                         heading: '2. Information We Collect',
