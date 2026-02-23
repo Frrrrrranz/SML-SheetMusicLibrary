@@ -275,18 +275,20 @@ export const AuthScreen: React.FC = () => {
                             </span>
                         </div>
 
-                        {/* Error Message - 带淡入动画 */}
+                        {/* Error Message - 使用 height 动画避免挤压布局 */}
                         <AnimatePresence>
                             {error && (
                                 <motion.div
-                                    initial={{ opacity: 0, y: -5 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -5 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="flex items-center gap-2 text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg"
+                                    initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                    animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
+                                    exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                                    className="overflow-hidden"
                                 >
-                                    <AlertCircle size={18} />
-                                    <span>{error}</span>
+                                    <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 px-4 py-3 rounded-lg">
+                                        <AlertCircle size={18} className="shrink-0" />
+                                        <span>{error}</span>
+                                    </div>
                                 </motion.div>
                             )}
                         </AnimatePresence>
