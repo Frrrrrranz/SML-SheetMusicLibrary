@@ -171,7 +171,7 @@ const DetailWrapper = ({
 
 // 认证路由守卫
 const AuthGuard: React.FC = () => {
-  const { session, loading } = useAuth();
+  const { session, profile, loading, signOut } = useAuth();
   const { t } = useLanguage();
 
   // 加载中显示 loading 状态
@@ -191,7 +191,35 @@ const AuthGuard: React.FC = () => {
     return <AuthScreen />;
   }
 
-  // 已登录显示主应用
+  // NOTE: 非管理员用户登录后显示限制提示页面
+  if (profile && profile.role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
+        <div className="w-full max-w-sm text-center">
+          <div className="mb-6 flex justify-center">
+            <div className="size-20 bg-oldGold/10 rounded-full flex items-center justify-center">
+              <span className="text-4xl">📱</span>
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold font-serif text-textMain mb-3">
+            请使用 SML APP
+          </h1>
+          <p className="text-textSub text-[15px] leading-relaxed mb-8">
+            本网页仅限管理员使用。<br />
+            普通用户请下载并使用 <strong>SML APP</strong> 管理您的乐谱和录音。
+          </p>
+          <button
+            onClick={() => signOut()}
+            className="w-full py-3.5 rounded-full font-bold text-white bg-oldGold hover:bg-[#d4ac26] transition-colors shadow-lg shadow-oldGold/20"
+          >
+            返回登录页
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 管理员：显示主应用
   return <AppContent />;
 };
 

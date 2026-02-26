@@ -331,26 +331,9 @@ export const AuthScreen: React.FC = () => {
                         </motion.button>
                     </form>
 
-                    <div className="mt-8 text-center text-sm">
-                        <AnimatePresence mode="wait" initial={false}>
-                            <motion.div
-                                key={`${mode}-switch-text`}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                <span className="text-textSub">
-                                    {mode === 'login' ? t.auth.noAccount : t.auth.hasAccount}
-                                </span>
-                                <button
-                                    onClick={switchMode}
-                                    className="ml-2 text-oldGold font-semibold hover:underline"
-                                >
-                                    {mode === 'login' ? t.auth.registerNow : t.auth.backToLogin}
-                                </button>
-                            </motion.div>
-                        </AnimatePresence>
+                    {/* NOTE: 注册功能已关闭，仅限管理员登录 */}
+                    <div className="mt-8 text-center text-xs text-textSub/60">
+                        仅限管理员登录
                     </div>
 
                     {/* Language Switcher */}
