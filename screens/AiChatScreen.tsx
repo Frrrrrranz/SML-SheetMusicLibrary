@@ -296,11 +296,10 @@ export const AiChatScreen: React.FC = () => {
     return (
         <div className="min-h-screen bg-background flex flex-col pb-20">
             {/* NOTE: 沉浸式 header，滚动时有模糊效果和底部渐隐 */}
-            <header className="sticky top-0 z-30 bg-background/70 backdrop-blur-3xl backdrop-saturate-200 px-6 pt-[calc(env(safe-area-inset-top)+3rem)] pb-3">
+            <header className="sticky top-0 z-30 bg-background/60 backdrop-blur-2xl backdrop-saturate-150 px-6 pt-[calc(env(safe-area-inset-top)+3.5rem)] pb-4 transition-all duration-300">
                 <h1 className="text-4xl font-bold tracking-tight text-textMain font-serif">
                     {t.aiChat.title}
                 </h1>
-
             </header>
             {/* Header 底部渐隐遮罩 */}
             <div className="sticky top-[calc(env(safe-area-inset-top)+6.5rem)] z-20 h-4 bg-gradient-to-b from-background/80 to-transparent pointer-events-none" />
