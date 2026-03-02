@@ -1,34 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
   <meta charset="utf-8" />
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>SML - Sheet Music Library</title>
-  <meta name="description" content="优雅的乐谱与录音管理应用，帮助音乐爱好者整理古典音乐收藏" />
+  <meta name="description" content="SML — 你的私人乐谱库。简洁高效的乐谱与练习录音管理应用，为音乐学习者打造。" />
   <meta property="og:title" content="SML - Sheet Music Library" />
-  <meta property="og:description" content="优雅的乐谱与录音管理应用，帮助音乐爱好者整理古典音乐收藏" />
+  <meta property="og:description" content="简洁高效的乐谱与练习录音管理应用，支持乐谱上传、练习录音、AI 音乐助手" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://sml-sheet-music-library.vercel.app/" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="SML - Sheet Music Library" />
-  <meta name="twitter:description" content="优雅的乐谱与录音管理应用" />
-  <!-- Favicon & PWA -->
+  <meta name="twitter:description" content="你的私人乐谱库 · Your Personal Sheet Music Library" />
+
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/logo.png" />
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#FAFAFA" />
-  <!-- iOS PWA 全屏模式 -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="SML" />
-  <!-- Fonts -->
+  <meta name="theme-color" content="#060b14" />
+
+  <!-- Fonts — 衬线 + 无衬线双字体系统 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Noto+Sans:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Noto+Sans:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
+
+  <!-- GSAP + ScrollTrigger — 滚动驱动动画核心 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -39,28 +40,31 @@
         extend: {
           colors: {
             oldGold: '#C5A059',
-            background: '#FAFAFA',
-            surface: '#FFFFFF',
-            darkBackground: '#1C1C1E',
-            darkSurface: '#2C2C2E',
-            textMain: '#171611',
-            textSub: '#877f64',
-            divider: 'rgba(0,0,0,0.05)',
+            goldLight: '#e8c878',
+            goldDim: 'rgba(197, 160, 89, 0.15)',
+            bgDeep: '#060b14',
+            bgSection: '#0a1220',
+            textPrimary: '#f0ece4',
+            textSecondary: 'rgba(240, 236, 228, 0.55)',
+            textAccent: '#C5A059',
+            divider: 'rgba(197, 160, 89, 0.1)',
           },
           fontFamily: {
-            serif: ['Newsreader', 'serif'],
+            serif: ['Newsreader', 'Georgia', 'serif'],
             sans: ['Noto Sans', 'sans-serif'],
           },
-          boxShadow: {
-            'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-          },
           animation: {
-            'shimmer': 'shimmer 1.8s ease-in-out infinite',
+            'scroll-pulse': 'scrollPulse 2s ease-in-out infinite',
+            'glow': 'glow 3s ease-in-out infinite alternate',
           },
           keyframes: {
-            shimmer: {
-              '0%': { transform: 'translateX(-100%)' },
-              '100%': { transform: 'translateX(100%)' },
+            scrollPulse: {
+              '0%, 100%': { opacity: '0.3', transform: 'scaleY(0.6)' },
+              '50%': { opacity: '1', transform: 'scaleY(1)' },
+            },
+            glow: {
+              '0%': { opacity: '0.4' },
+              '100%': { opacity: '0.8' },
             },
           },
         },
@@ -68,37 +72,48 @@
     }
   </script>
   <style>
+    /* NOTE: 深色沉浸式全局样式 */
+    html {
+      scroll-behavior: auto;
+      overflow-x: hidden;
+      background: #060b14;
+    }
+
     body {
-      background-color: #FAFAFA;
-      color: #171611;
+      background: #060b14;
+      color: #f0ece4;
       -webkit-font-smoothing: antialiased;
-      /* 适配全面屏安全区域（刘海屏/圆角屏），standalone 模式下状态栏区域自动留白 */
-      /* 适配全面屏安全区域（刘海屏/圆角屏），standalone 模式下状态栏区域自动留白 */
-      /* 移除 padding-top: env(safe-area-inset-top)，由各页面 Header 独立处理 */
-      padding-bottom: env(safe-area-inset-bottom);
+      overflow-x: hidden;
     }
 
-    /* Shimmer skeleton background */
-    .skeleton-shimmer {
-      position: relative;
-      overflow: hidden;
-      background: #EBEAE6;
-      border-radius: 8px;
-    }
-    .skeleton-shimmer::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.4) 50%,
-        transparent 100%
-      );
-      animation: shimmer 1.8s ease-in-out infinite;
+    /* 自定义光标 — 仅桌面端 */
+    @media (min-width: 769px) {
+      body {
+        cursor: none;
+      }
     }
 
-    /* Hide scrollbar for clean UI */
+    /* 自定义滚动条 — GTA6 风格窄金色 */
+    ::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #060b14;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #1a3a5c, #C5A059);
+      border-radius: 2px;
+    }
+
+    /* 选中文字 */
+    ::selection {
+      background: rgba(197, 160, 89, 0.3);
+      color: #f0ece4;
+    }
+
+    /* 隐藏滚动条（辅助 class） */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -108,14 +123,14 @@
       scrollbar-width: none;
     }
   </style>
+
   <script type="importmap">
 {
   "imports": {
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
-    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.13.0"
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0"
   }
 }
 </script>

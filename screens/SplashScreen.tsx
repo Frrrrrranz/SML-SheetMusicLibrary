@@ -31,7 +31,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
         <AnimatePresence onExitComplete={handleExitComplete}>
             {isVisible && (
                 <motion.div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-[#FAFAFA]"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-[#060b14]"
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
                 >
@@ -43,7 +43,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
                     >
                         {/* 使用 CSS 绘制或 SVG 渲染 Logo，或者直接显示文字，避免图片加载闪烁 */}
                         {/* 这里使用与 Maskable Image 一致的衬线体 SML */}
-                        <h1 className="text-6xl font-serif text-[#171611] tracking-widest font-bold">
+                        <h1 className="text-6xl font-serif tracking-widest font-bold" style={{ backgroundImage: 'linear-gradient(180deg, #f0ece4, #C5A059)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                             SML
                         </h1>
                     </motion.div>
