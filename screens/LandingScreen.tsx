@@ -455,7 +455,7 @@ export const LandingScreen: React.FC = () => {
           </div>
 
           {/* 技术统计 */}
-          <div className="flex gap-12 md:gap-20 justify-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 max-w-3xl w-full px-4">
             {landing.stats.map((stat: { value: string; label: string }, index: number) => (
               <div key={index} className="stat-item opacity-0 translate-y-8 flex flex-col items-center gap-2 bg-white/[0.03] border border-white/[0.06] rounded-sm px-8 py-6 hover:border-oldGold/20 transition-all duration-500">
                 <span className="font-sans text-2xl md:text-3xl font-bold text-textPrimary tracking-wider">
