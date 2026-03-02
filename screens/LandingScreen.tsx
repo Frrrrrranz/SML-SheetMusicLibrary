@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { Music, Mic, FolderOpen, Sparkles, Download, Github, Globe } from 'lucide-react';
+import { Download, Github, Globe } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
-// NOTE: 功能图标映射
-const FEATURE_ICONS = [Music, Mic, FolderOpen, Sparkles] as const;
+
 
 const GITHUB_RELEASE_URL = 'https://github.com/Frrrrrranz/SML-APP/releases/latest';
 const GITHUB_REPO_URL = 'https://github.com/Frrrrrranz/SML-APP';
@@ -206,11 +205,11 @@ export const LandingScreen: React.FC = () => {
       opacity: 1, y: 0,
       scrollTrigger: { trigger: '#reveal-section', start: 'top 75%', end: 'top 45%', scrub: 1 },
     });
-    // NOTE: 每个 feature-card 独立触发，避免 stagger + scrub 组合导致的归位卡顿
-    document.querySelectorAll('.feature-card').forEach((card) => {
-      gsap.to(card, {
+    // NOTE: 每个 feature-text 独立触发，纯文字模式避免方框渲染开销
+    document.querySelectorAll('.feature-text').forEach((el) => {
+      gsap.to(el, {
         opacity: 1, y: 0,
-        scrollTrigger: { trigger: card, start: 'top 90%', end: 'top 65%', scrub: 1 },
+        scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 65%', scrub: 1 },
       });
     });
 
@@ -231,11 +230,11 @@ export const LandingScreen: React.FC = () => {
       opacity: 1, y: 0, scale: 1,
       scrollTrigger: { trigger: '#tech-section', start: 'top 70%', end: 'top 30%', scrub: 1 },
     });
-    // NOTE: 每个 stat-item 独立触发，避免 stagger + scrub 组合导致的归位卡顿
-    document.querySelectorAll('.stat-item').forEach((item) => {
-      gsap.to(item, {
+    // NOTE: 每个 stat-text 独立触发，纯文字模式避免方框渲染开销
+    document.querySelectorAll('.stat-text').forEach((el) => {
+      gsap.to(el, {
         opacity: 1, y: 0,
-        scrollTrigger: { trigger: item, start: 'top 90%', end: 'top 65%', scrub: 1 },
+        scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 65%', scrub: 1 },
       });
     });
 
@@ -382,23 +381,17 @@ export const LandingScreen: React.FC = () => {
             </p>
           </div>
 
-          {/* 功能卡片网格 */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl w-full">
-            {landing.features.map((feature: { title: string; desc: string }, index: number) => {
-              const Icon = FEATURE_ICONS[index];
-              return (
-                <div
-                  key={index}
-                  className="feature-card opacity-0 translate-y-10 bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-sm p-5 text-center hover:border-oldGold/20 transition-all duration-500 group"
-                >
-                  <div className="mx-auto w-10 h-10 rounded-sm bg-oldGold/10 flex items-center justify-center mb-3 group-hover:bg-oldGold/20 transition-colors">
-                    <Icon size={18} className="text-oldGold" />
-                  </div>
-                  <h4 className="text-sm font-serif font-bold text-textPrimary mb-1">{feature.title}</h4>
-                  <p className="text-[11px] text-textSecondary leading-relaxed font-light">{feature.desc}</p>
-                </div>
-              );
-            })}
+          {/* 功能列表 — 纯文字，避免方框渲染开销 */}
+          <div className="flex flex-col items-center gap-6 max-w-md w-full">
+            {landing.features.map((feature: { title: string; desc: string }, index: number) => (
+              <div
+                key={index}
+                className="feature-text opacity-0 translate-y-7 text-center"
+              >
+                <h4 className="font-serif text-lg font-bold text-textPrimary mb-1">{feature.title}</h4>
+                <p className="text-xs text-textSecondary font-light tracking-wide">{feature.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -460,14 +453,14 @@ export const LandingScreen: React.FC = () => {
             </h2>
           </div>
 
-          {/* 技术统计 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 max-w-3xl w-full px-4">
+          {/* 技术统计 — 纯文字，避免方框渲染开销 */}
+          <div className="flex flex-col items-center gap-8 mt-4">
             {landing.stats.map((stat: { value: string; label: string }, index: number) => (
-              <div key={index} className="stat-item opacity-0 translate-y-8 flex flex-col items-center gap-2 bg-white/[0.03] border border-white/[0.06] rounded-sm px-8 py-6 hover:border-oldGold/20 transition-all duration-500">
-                <span className="font-sans text-2xl md:text-3xl font-bold text-textPrimary tracking-wider">
+              <div key={index} className="stat-text opacity-0 translate-y-7 text-center">
+                <span className="block font-sans text-3xl md:text-4xl font-bold text-textPrimary tracking-wider">
                   {stat.value}
                 </span>
-                <span className="text-[0.6rem] tracking-[0.3em] text-textSecondary font-light uppercase">
+                <span className="block text-[0.6rem] tracking-[0.3em] text-textSecondary font-light uppercase mt-1">
                   {stat.label}
                 </span>
               </div>
