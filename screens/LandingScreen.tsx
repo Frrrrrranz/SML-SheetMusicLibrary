@@ -206,9 +206,12 @@ export const LandingScreen: React.FC = () => {
       opacity: 1, y: 0,
       scrollTrigger: { trigger: '#reveal-section', start: 'top 75%', end: 'top 45%', scrub: 1 },
     });
-    gsap.to('.feature-card', {
-      opacity: 1, y: 0, stagger: 0.1,
-      scrollTrigger: { trigger: '.feature-card', start: 'top 90%', end: 'top 60%', scrub: 1 },
+    // NOTE: 每个 feature-card 独立触发，避免 stagger + scrub 组合导致的归位卡顿
+    document.querySelectorAll('.feature-card').forEach((card) => {
+      gsap.to(card, {
+        opacity: 1, y: 0,
+        scrollTrigger: { trigger: card, start: 'top 90%', end: 'top 65%', scrub: 1 },
+      });
     });
 
     // ========== 故事叙述 — 逐行淡入 ==========
@@ -228,9 +231,12 @@ export const LandingScreen: React.FC = () => {
       opacity: 1, y: 0, scale: 1,
       scrollTrigger: { trigger: '#tech-section', start: 'top 70%', end: 'top 30%', scrub: 1 },
     });
-    gsap.to('.stat-item', {
-      opacity: 1, y: 0, stagger: 0.15,
-      scrollTrigger: { trigger: '#tech-section', start: '20% 70%', end: '40% 40%', scrub: 1 },
+    // NOTE: 每个 stat-item 独立触发，避免 stagger + scrub 组合导致的归位卡顿
+    document.querySelectorAll('.stat-item').forEach((item) => {
+      gsap.to(item, {
+        opacity: 1, y: 0,
+        scrollTrigger: { trigger: item, start: 'top 90%', end: 'top 65%', scrub: 1 },
+      });
     });
 
     // ========== CTA 结尾 ==========
