@@ -1,47 +1,72 @@
-# SML Admin Console 🎼
+# SML-APP 🎼
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Status-Maintenance-yellow?style=for-the-badge" alt="Status" />
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Capacitor-119EFF?style=for-the-badge&logo=capacitor&logoColor=white" alt="Capacitor" />
+  <img src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android" />
   <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
 </p>
 
-> **⚠️ 本仓库为管理员后台，仅供管理员操作云端数据使用。**
->
-> 普通用户请使用 👉 [**SML-APP**](https://github.com/Frrrrrranz/SML-APP)（Android 客户端）
+一个简洁、高效的乐谱与练习录音管理 Android 应用，为音乐学习者提供便捷的资源整理方案。
 
 ---
 
-## 📌 项目定位
+## 🌟 核心功能
 
-本项目是 SML（Sheet Music Library）的 Web 管理后台，主要用途：
+- **🎼 乐谱管理**：上传 PDF 格式曲谱，打造私人数字曲库
+- **🎙️ 练习录音**：记录与管理练习音频，见证演奏进步
+- **🗂️ 分类整理**：按作曲家和作品系统化管理音乐资产
+- **🤖 AI 音乐助手**：内置 AI 聊天，随时解答乐理、音乐史等问题
+- **📱 离线使用**：本地存储，无需网络即可管理乐谱
+- **☁️ 云端同步**：可选的 Supabase 云端数据同步
 
-- **管理云端乐谱数据**：上传/编辑/删除作曲家、乐谱、录音
-- **管理用户数据**：云端 Supabase 数据库的增删改查
-- **AI 音乐助手**：内置 AI 聊天（通义千问）
+## 📥 下载与安装 (Download & Install)
 
-> 📋 本网页已关闭公开注册，非管理员无法访问。
+欢迎下载经过数字签名的 Android 正式版应用体验核心功能：
 
-## 🛠️ 技术栈
+1. **前往下载**: 访问 [GitHub Releases 页面](https://github.com/Frrrrrranz/SML-APP/releases/latest)
+2. **获取文件**: 在 Assets 列表中点击下载最新版本的 `app-release.apk`
+3. **安装应用**: 在 Android 手机上打开下载的 APK，如果系统提示，请允许"安装未知来源应用"即可完成安装
 
-- **前端**: React 19 + TypeScript + Vite
-- **后端**: Supabase (Database & Storage)
-- **AI**: 通义千问 (DashScope API)，通过 Supabase Edge Functions 调用
+---
+
+## 🛠️ 技术实现
+
+### 客户端
+- **框架**: React 19 + TypeScript
+- **原生层**: Capacitor (Android)
+- **构建工具**: Vite
 - **动画**: Framer Motion
-- **部署**: Vercel
+- **图标**: Lucide React
+- **路由**: React Router
 
-## 🚀 本地运行（仅管理员）
+### 后端与 AI
+- **云端服务**: Supabase (Database & Storage)
+- **本地存储**: Capacitor Preferences + Filesystem
+- **AI 能力**: 通义千问 (DashScope API)
+
+---
+
+## 📌 关于本仓库
+
+> **本仓库为 SML-APP 的 Web 展示页**，已从原管理后台改造为 SML-APP 的官方介绍页面。
+>
+> ⚠️ **SML-APP 的所有后续开发与更新均在 [SML-APP 仓库](https://github.com/Frrrrrranz/SML-APP) 进行。**
+
+本网页采用 GTA6 风格的沉浸式滚动设计，包含：
+- 全屏深色主题 + GSAP ScrollTrigger 滚动驱动动画
+- 金色粒子 Canvas + 桌面端自定义光标
+- 5 段式布局：Hero / 功能揭示 / 故事叙述 / 技术展示 / CTA
+- 中英文双语切换
+- 部署于 Vercel
+
+### 本地运行
 
 ```bash
 npm install
-# 在 .env 中配置 Supabase 凭据
 npm run dev
 ```
-
-## 🔮 未来规划
-
-本网页将逐步改造为 **SML-APP 的官方介绍展示页**，作为用户下载和了解 SML-APP 的入口。
 
 ---
 
@@ -49,5 +74,9 @@ npm run dev
 
 | 仓库 | 说明 |
 |------|------|
-| [SML-APP](https://github.com/Frrrrrranz/SML-APP) | Android 客户端（主力开发） |
-| [SML](https://github.com/Frrrrrranz/SML-SheetMusicLibrary) | Web 管理后台（本仓库，维护模式） |
+| [SML-APP](https://github.com/Frrrrrranz/SML-APP) | Android 客户端（**主力开发，所有更新在此**） |
+| [SML-Web](https://github.com/Frrrrrranz/SML-SheetMusicLibrary) | Web 展示页（本仓库） |
+
+## 📄 致谢
+
+本项目的 UI 组件和动画设计灵感部分源自 [ShipSwift](https://github.com/signerlabs/ShipSwift.git)，由 [SignerLabs](https://github.com/signerlabs) 开发。特别感谢其对移动端体验和 AI 交互动画的探索，为本项目的前端优化提供了宝贵参考。
