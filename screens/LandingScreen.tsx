@@ -470,7 +470,7 @@ export const LandingScreen: React.FC = () => {
       </section>
 
       {/* ===================== SECTION 5: CTA 结尾 ===================== */}
-      <section id="cta-section" className="relative min-h-screen flex flex-col items-center justify-center px-6 py-20">
+      <section id="cta-section" className="relative min-h-screen flex flex-col items-center justify-center px-6 py-20 overflow-hidden">
         <div className="absolute inset-0 bg-bgDeep" />
         {/* 底部暖色光晕 */}
         <div
