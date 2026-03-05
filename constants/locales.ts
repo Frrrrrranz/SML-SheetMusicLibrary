@@ -19,6 +19,7 @@ export const translations = {
                 { title: '练习录音', desc: '记录每一次练习，见证演奏的蜕变' },
                 { title: '分类整理', desc: '按作曲家与作品，系统化管理音乐资产' },
                 { title: 'AI 助手', desc: '随时解答乐理、技法与音乐史问题' },
+                { title: '多端覆盖', desc: 'Android 手机与 Windows 桌面端，随时随地管理乐谱' },
             ],
 
             // 故事叙述
@@ -42,17 +43,18 @@ export const translations = {
             techTitle: '技术驱动',
             stats: [
                 { value: 'React', label: '前端框架' },
-                { value: 'Capacitor', label: '跨平台' },
+                { value: 'Electron + Capacitor', label: '跨平台 · 多端覆盖' },
                 { value: 'Supabase', label: '云端服务' },
             ],
 
             // CTA 结尾
             ctaLabel: 'GET STARTED',
             ctaTitle: '开始你的音乐之旅',
-            ctaSubtitle: '免费下载 · 开源 · Android',
-            downloadBtn: '下载 SML',
+            ctaSubtitle: '免费下载 · 开源 · Android & Windows',
+            downloadAndroidBtn: 'Android 下载',
+            downloadWindowsBtn: 'Windows 下载',
             githubBtn: 'GitHub',
-            copyright: '© 2025 SML · Sheet Music Library',
+            copyright: '© 2025-2026 SML · Sheet Music Library',
         },
         common: {
             language: '语言',
@@ -80,6 +82,7 @@ export const translations = {
                 { title: 'Recordings', desc: 'Record every practice session, witness your growth' },
                 { title: 'Organized', desc: 'Manage systematically by composer and piece' },
                 { title: 'AI Assistant', desc: 'Get answers on music theory, technique, and history' },
+                { title: 'Multi-Platform', desc: 'Android mobile and Windows desktop, manage your music anywhere' },
             ],
 
             // 故事叙述
@@ -103,17 +106,18 @@ export const translations = {
             techTitle: 'Tech Driven',
             stats: [
                 { value: 'React', label: 'Frontend' },
-                { value: 'Capacitor', label: 'Cross-platform' },
+                { value: 'Electron + Capacitor', label: 'Cross-platform' },
                 { value: 'Supabase', label: 'Cloud Service' },
             ],
 
             // CTA 结尾
             ctaLabel: 'GET STARTED',
             ctaTitle: 'Begin Your Musical Journey',
-            ctaSubtitle: 'Free · Open Source · Android',
-            downloadBtn: 'Download SML',
+            ctaSubtitle: 'Free · Open Source · Android & Windows',
+            downloadAndroidBtn: 'Download Android',
+            downloadWindowsBtn: 'Download Windows',
             githubBtn: 'GitHub',
-            copyright: '© 2025 SML · Sheet Music Library',
+            copyright: '© 2025-2026 SML · Sheet Music Library',
         },
         common: {
             language: 'Language',

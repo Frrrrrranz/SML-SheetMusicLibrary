@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { Download, Github, Globe } from 'lucide-react';
+import { Download, Github, Globe, Monitor } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 
@@ -506,22 +506,31 @@ export const LandingScreen: React.FC = () => {
             {landing.ctaSubtitle}
           </p>
 
-          {/* 按钮组 */}
+          {/* 按钮组 — Android / Windows / GitHub */}
           <div id="cta-buttons" className="flex flex-col sm:flex-row gap-4 mt-4 opacity-0 translate-y-5">
             <a
               href={GITHUB_RELEASE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2.5 px-10 py-4 bg-oldGold text-bgDeep font-bold text-base rounded-sm hover:bg-goldLight transition-colors shadow-lg shadow-oldGold/20"
+              className="flex items-center justify-center gap-2.5 px-8 py-4 bg-oldGold text-bgDeep font-bold text-base rounded-sm hover:bg-goldLight transition-colors shadow-lg shadow-oldGold/20"
             >
               <Download size={18} />
-              {landing.downloadBtn}
+              {landing.downloadAndroidBtn}
+            </a>
+            <a
+              href={GITHUB_RELEASE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2.5 px-8 py-4 bg-oldGold text-bgDeep font-bold text-base rounded-sm hover:bg-goldLight transition-colors shadow-lg shadow-oldGold/20"
+            >
+              <Monitor size={18} />
+              {landing.downloadWindowsBtn}
             </a>
             <a
               href={GITHUB_REPO_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2.5 px-10 py-4 border border-oldGold/30 text-oldGold font-semibold text-base rounded-sm hover:bg-oldGold/10 transition-colors"
+              className="flex items-center justify-center gap-2.5 px-8 py-4 border border-oldGold/30 text-oldGold font-semibold text-base rounded-sm hover:bg-oldGold/10 transition-colors"
             >
               <Github size={18} />
               {landing.githubBtn}
