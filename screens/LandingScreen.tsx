@@ -2,6 +2,10 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { Download, Github, Globe, Monitor } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
+import appHome from '../pic/app-home.jpg';
+import composerProfile from '../pic/composer-profile.jpg';
+import aiAssistant from '../pic/ai-assistant.jpg';
+
 
 
 const GITHUB_RELEASE_URL = 'https://github.com/Frrrrrranz/SML-APP/releases/latest';
@@ -252,6 +256,29 @@ export const LandingScreen: React.FC = () => {
       scrollTrigger: { trigger: '#cta-section', start: '50% 80%', end: '70% 60%', scrub: 1 },
     });
 
+    // ========== 界面展示 — 散乱漂浮 ==========
+    gsap.fromTo('#showcase-img-1',
+      { y: 100, rotate: -8 },
+      {
+        y: -100, rotate: -2,
+        scrollTrigger: { trigger: '#showcase-section', start: 'top bottom', end: 'bottom top', scrub: 1.5 },
+      }
+    );
+    gsap.fromTo('#showcase-img-2',
+      { y: 80, rotate: 2 },
+      {
+        y: -80, rotate: 5,
+        scrollTrigger: { trigger: '#showcase-section', start: 'top bottom', end: 'bottom top', scrub: 1 },
+      }
+    );
+    gsap.fromTo('#showcase-img-3',
+      { y: 80, rotate: -3 },
+      {
+        y: -80, rotate: 2,
+        scrollTrigger: { trigger: '#showcase-section', start: 'top bottom', end: 'bottom top', scrub: 2 },
+      }
+    );
+
     // NOTE: 底部光晕随滚动增强
     gsap.to('#cta-glow', {
       opacity: 0.6, scale: 1.2,
@@ -392,6 +419,47 @@ export const LandingScreen: React.FC = () => {
                 <p className="text-xs text-textSecondary font-light tracking-wide">{feature.desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===================== SECTION 2.5: 界面展示 ===================== */}
+      <section id="showcase-section" className="relative z-20 min-h-[120vh] flex items-center justify-center px-6 py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-bgDeep via-bgSection to-bgDeep" />
+
+        {/* 中心微光 */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle,rgba(197,160,89,0.05)_0%,transparent_70%)] pointer-events-none" />
+
+        <div className="relative z-10 w-full max-w-7xl mx-auto">
+          {/* 取消比例容器，改用足够高的最小高度，确保容纳 1:2 比例的截图及其视差位移 */}
+          <div className="relative min-h-[700px] md:min-h-[1000px] flex items-center justify-center">
+            {/* 散乱排版：作曲家主页 (Center-ish) - 向上移动并减弱动力 */}
+            <div id="showcase-img-2" className="absolute z-20 w-[60%] md:w-[32%] top-[5%] md:top-[8%] left-1/2 -translate-x-1/2 rounded-[2.2rem] overflow-hidden shadow-[0_40px_80px_-15px_rgba(0,0,0,0.8)] hover:z-30 transition-all duration-500 ring-1 ring-white/10">
+              <img
+                src={appHome}
+                alt="App Home"
+                className="w-full h-auto scale-[1.02] origin-center"
+              />
+              <div className="absolute inset-0 rounded-[2.2rem] ring-1 ring-inset ring-white/20 pointer-events-none" />
+            </div>
+
+            {/* 个人主页 (Left) */}
+            <div id="showcase-img-1" className="absolute z-10 w-[55%] md:w-[28%] left-[0%] md:left-[8%] top-[20%] md:top-[22%] rounded-[1.8rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] ring-1 ring-white/5">
+              <img
+                src={composerProfile}
+                alt="Composer Profile"
+                className="w-full h-auto scale-[1.02] origin-center opacity-80"
+              />
+            </div>
+
+            {/* AI 助手 (Right) */}
+            <div id="showcase-img-3" className="absolute z-10 w-[55%] md:w-[28%] right-[0%] md:right-[8%] top-[18%] md:top-[24%] rounded-[1.8rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] ring-1 ring-white/5">
+              <img
+                src={aiAssistant}
+                alt="AI Assistant"
+                className="w-full h-auto scale-[1.02] origin-center opacity-80"
+              />
+            </div>
           </div>
         </div>
       </section>
