@@ -430,11 +430,12 @@ export const LandingScreen: React.FC = () => {
         {/* 中心微光 */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle,rgba(197,160,89,0.05)_0%,transparent_70%)] pointer-events-none" />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto">
-          {/* 移动端增加最小高度，避免长截图在窄屏下溢出被切 */}
-          <div className="relative min-h-[600px] md:min-h-[1000px] flex items-center justify-center">
-            {/* 散乱排版：作曲家主页 (Center-ish) - 向上移动并减弱动力 */}
-            <div id="showcase-img-2" className="absolute z-20 w-[65%] md:w-[32%] top-[5%] md:top-[8%] left-1/2 -translate-x-1/2 rounded-[2.2rem] overflow-hidden shadow-[0_40px_80px_-15px_rgba(0,0,0,0.8)] hover:z-30 transition-all duration-500 ring-1 ring-white/10">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4">
+          {/* 移动端改为 flex 竖向排列，桌面端恢复 absolute 散乱布局 */}
+          <div className="flex flex-col md:block items-center gap-20 md:gap-0 md:min-h-[1200px] py-10 md:py-0">
+
+            {/* 1. 作曲家主页 (Center-ish focus) */}
+            <div id="showcase-img-2" className="relative md:absolute z-20 w-[85%] md:w-[32%] md:top-[8%] md:left-1/2 md:-translate-x-1/2 rounded-[2.2rem] overflow-hidden shadow-[0_40px_80px_-15px_rgba(0,0,0,0.8)] hover:z-30 transition-all duration-500 ring-1 ring-white/10">
               <img
                 src={appHome}
                 alt="App Home"
@@ -443,21 +444,21 @@ export const LandingScreen: React.FC = () => {
               <div className="absolute inset-0 rounded-[2.2rem] ring-1 ring-inset ring-white/20 pointer-events-none" />
             </div>
 
-            {/* 个人主页 (Left) - 移动端向左外推，减小宽度避免过度重叠 */}
-            <div id="showcase-img-1" className="absolute z-10 w-[45%] md:w-[28%] left-[-5%] md:left-[8%] top-[20%] md:top-[22%] rounded-[1.8rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] ring-1 ring-white/5">
+            {/* 2. 个人主页 (Left) */}
+            <div id="showcase-img-1" className="relative md:absolute z-10 w-[85%] md:w-[28%] md:left-[8%] md:top-[18%] rounded-[1.8rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] ring-1 ring-white/5">
               <img
                 src={composerProfile}
                 alt="Composer Profile"
-                className="w-full h-auto scale-[1.02] origin-center opacity-80"
+                className="w-full h-auto scale-[1.02] origin-center opacity-90 md:opacity-80"
               />
             </div>
 
-            {/* AI 助手 (Right) - 移动端向右外推，减小宽度避免过度重叠 */}
-            <div id="showcase-img-3" className="absolute z-10 w-[45%] md:w-[28%] right-[-5%] md:right-[8%] top-[18%] md:top-[24%] rounded-[1.8rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] ring-1 ring-white/5">
+            {/* 3. AI 助手 (Right) */}
+            <div id="showcase-img-3" className="relative md:absolute z-10 w-[85%] md:w-[28%] md:right-[8%] md:top-[24%] rounded-[1.8rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] ring-1 ring-white/5">
               <img
                 src={aiAssistant}
                 alt="AI Assistant"
-                className="w-full h-auto scale-[1.02] origin-center opacity-80"
+                className="w-full h-auto scale-[1.02] origin-center opacity-90 md:opacity-80"
               />
             </div>
           </div>
