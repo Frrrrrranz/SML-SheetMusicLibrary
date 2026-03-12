@@ -24,6 +24,7 @@ export const translations = {
 
             // 故事叙述
             storyLabel: 'THE PHILOSOPHY',
+            storyTitle: '音乐的意义',
             storyLines: [
                 '每一份乐谱，',
                 '都承载着作曲家的灵魂。',
@@ -41,6 +42,7 @@ export const translations = {
             // 数据/技术
             techLabel: 'POWERED BY',
             techTitle: '技术驱动',
+            techDesc: '单一代码库，跨平台部署，云端同步，为音乐学习者提供完整解决方案',
             stats: [
                 { value: 'React', label: '前端框架' },
                 { value: 'Electron + Capacitor', label: '跨平台 · 多端覆盖' },
@@ -87,6 +89,7 @@ export const translations = {
 
             // 故事叙述
             storyLabel: 'THE PHILOSOPHY',
+            storyTitle: 'The Meaning of Music',
             storyLines: [
                 'Every sheet of music',
                 'carries a composer\'s soul.',
@@ -104,6 +107,7 @@ export const translations = {
             // 数据/技术
             techLabel: 'POWERED BY',
             techTitle: 'Tech Driven',
+            techDesc: 'Single codebase, cross-platform deployment, cloud sync - a complete solution for music learners',
             stats: [
                 { value: 'React', label: 'Frontend' },
                 { value: 'Electron + Capacitor', label: 'Cross-platform' },

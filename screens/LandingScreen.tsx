@@ -222,6 +222,10 @@ export const LandingScreen: React.FC = () => {
       opacity: 1,
       scrollTrigger: { trigger: '#story-section', start: 'top 80%', end: 'top 50%', scrub: 1 },
     });
+    gsap.to('#story-section h2', {
+      opacity: 1, y: 0,
+      scrollTrigger: { trigger: '#story-section', start: 'top 75%', end: 'top 45%', scrub: 1 },
+    });
     document.querySelectorAll('.story-line').forEach((line) => {
       gsap.to(line, {
         opacity: 1, y: 0,
@@ -230,6 +234,10 @@ export const LandingScreen: React.FC = () => {
     });
 
     // ========== 技术展示 — 视差浮现 ==========
+    gsap.to('#tech-glow', {
+      opacity: 1, scale: 1.1,
+      scrollTrigger: { trigger: '#tech-section', start: 'top 80%', end: 'top 30%', scrub: 1 },
+    });
     gsap.to('.tech-card', {
       opacity: 1, y: 0, scale: 1,
       scrollTrigger: { trigger: '#tech-section', start: 'top 70%', end: 'top 30%', scrub: 1 },
@@ -475,10 +483,22 @@ export const LandingScreen: React.FC = () => {
         <div className="relative z-10 max-w-xl text-center">
           <span
             id="story-label"
-            className="block text-[0.6rem] tracking-[0.5em] text-oldGold font-semibold mb-12 opacity-0"
+            className="block text-[0.6rem] tracking-[0.5em] text-oldGold font-semibold mb-4 opacity-0"
           >
             {landing.storyLabel}
           </span>
+          
+          <h2
+            className="font-serif font-bold text-transparent bg-clip-text mb-12 opacity-0 translate-y-7"
+            style={{
+              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+              backgroundImage: 'linear-gradient(135deg, #f0ece4, #e8c878)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            {landing.storyTitle}
+          </h2>
 
           <div className="space-y-1">
             {landing.storyLines.map((line: string, index: number) => (
@@ -499,7 +519,13 @@ export const LandingScreen: React.FC = () => {
 
       {/* ===================== SECTION 4: 技术展示 ===================== */}
       <section id="tech-section" className="relative min-h-[70vh] flex items-center justify-center px-6 py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-bgDeep" />
+        <div className="absolute inset-0 bg-gradient-to-b from-bgDeep via-bgSection to-bgDeep" />
+        {/* 中心光晕 — 与功能揭示部分保持一致 */}
+        <div
+          id="tech-glow"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-0"
+          style={{ background: 'radial-gradient(circle, rgba(197, 160, 89, 0.1) 0%, transparent 70%)' }}
+        />
         {/* 底部微光 */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-oldGold/[0.04] rounded-full blur-[100px] pointer-events-none" />
 
@@ -510,7 +536,7 @@ export const LandingScreen: React.FC = () => {
               {landing.techLabel}
             </span>
             <h2
-              className="font-serif font-bold text-transparent bg-clip-text"
+              className="font-serif font-bold text-transparent bg-clip-text mb-4"
               style={{
                 fontSize: 'clamp(2rem, 5vw, 4rem)',
                 backgroundImage: 'linear-gradient(135deg, #f0ece4, #e8c878)',
@@ -520,6 +546,9 @@ export const LandingScreen: React.FC = () => {
             >
               {landing.techTitle}
             </h2>
+            <p className="text-sm md:text-base text-textSecondary font-light max-w-md mx-auto leading-relaxed">
+              {landing.techDesc}
+            </p>
           </div>
 
           {/* 技术统计 — 纯文字，避免方框渲染开销 */}
