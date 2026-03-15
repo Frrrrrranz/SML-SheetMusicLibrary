@@ -102,3 +102,6 @@ npm run dev
 ## 📄 致谢
 
 本项目的 UI 组件和动画设计灵感部分源自 [ShipSwift](https://github.com/signerlabs/ShipSwift.git)，由 [SignerLabs](https://github.com/signerlabs) 开发。特别感谢其对移动端体验和 AI 交互动画的探索，为本项目的前端优化提供了宝贵参考。
+
+## Workflow
+See [WORKFLOW.md](./WORKFLOW.md) for Git commit/push conventions (including noreply email policy).
