@@ -11,6 +11,64 @@ import aiAssistant from '../pic/ai-assistant.jpg';
 const GITHUB_RELEASE_URL = 'https://github.com/Frrrrrranz/SML-APP/releases/latest';
 const GITHUB_REPO_URL = 'https://github.com/Frrrrrranz/SML-APP';
 
+interface ShowcasePhoneProps {
+  id: string;
+  image: string;
+  alt: string;
+  outerClassName: string;
+  frameRadius: string;
+  screenRadius: string;
+  imageClassName?: string;
+}
+
+const ShowcasePhone: React.FC<ShowcasePhoneProps> = ({
+  id,
+  image,
+  alt,
+  outerClassName,
+  frameRadius,
+  screenRadius,
+  imageClassName = '',
+}) => (
+  <div
+    id={id}
+    className={`showcase-card relative ${outerClassName}`}
+    style={{ willChange: 'transform' }}
+  >
+    <div
+      className="relative bg-[#07090d] p-[6px] md:p-[7px] shadow-[0_40px_90px_-20px_rgba(0,0,0,0.82)]"
+      style={{ borderRadius: frameRadius }}
+    >
+      <div
+        className="relative overflow-hidden bg-[#090b11]"
+        style={{ borderRadius: screenRadius }}
+      >
+        <img
+          src={image}
+          alt={alt}
+          className={`block w-full h-auto ${imageClassName}`}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            borderRadius: screenRadius,
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 24px 30px -24px rgba(255,255,255,0.18)',
+          }}
+        />
+      </div>
+
+      <div
+        className="absolute inset-[3px] md:inset-[4px] pointer-events-none"
+        style={{
+          borderRadius: `calc(${frameRadius} - 3px)`,
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.14), inset 0 0 0 2px rgba(255,255,255,0.03)',
+        }}
+      />
+      <div className="absolute left-1/2 top-[10px] md:top-[12px] h-[5px] md:h-[6px] w-[26%] -translate-x-1/2 rounded-full bg-white/10 pointer-events-none" />
+    </div>
+  </div>
+);
+
 // =============================================
 // 粒子 Canvas — 金色音符粒子飘浮效果
 // =============================================
@@ -178,6 +236,11 @@ export const LandingScreen: React.FC = () => {
 
     if (!gsap || !ScrollTrigger) return;
     gsap.registerPlugin(ScrollTrigger);
+    gsap.set('.showcase-card', {
+      transformPerspective: 1400,
+      transformStyle: 'preserve-3d',
+      force3D: true,
+    });
 
     // ========== HERO 入场 ==========
     const heroTl = gsap.timeline({ delay: 0.3 });
@@ -266,23 +329,23 @@ export const LandingScreen: React.FC = () => {
 
     // ========== 界面展示 — 散乱漂浮 ==========
     gsap.fromTo('#showcase-img-1',
-      { y: 100, rotate: -8 },
+      { yPercent: 10, rotate: -7, rotateY: 5, scale: 0.97 },
       {
-        y: -100, rotate: -2,
-        scrollTrigger: { trigger: '#showcase-section', start: 'top bottom', end: 'bottom top', scrub: 1.5 },
+        yPercent: -10, rotate: -3, rotateY: -3, scale: 1.01, ease: 'none',
+        scrollTrigger: { trigger: '#showcase-section', start: 'top bottom', end: 'bottom top', scrub: 1.8 },
       }
     );
     gsap.fromTo('#showcase-img-2',
-      { y: 80, rotate: 2 },
+      { yPercent: 7, rotate: 1.5, rotateY: -2, scale: 0.985 },
       {
-        y: -80, rotate: 5,
-        scrollTrigger: { trigger: '#showcase-section', start: 'top bottom', end: 'bottom top', scrub: 1 },
+        yPercent: -7, rotate: 4, rotateY: 2, scale: 1.02, ease: 'none',
+        scrollTrigger: { trigger: '#showcase-section', start: 'top bottom', end: 'bottom top', scrub: 1.6 },
       }
     );
     gsap.fromTo('#showcase-img-3',
-      { y: 80, rotate: -3 },
+      { yPercent: 8, rotate: -2.5, rotateY: -4, scale: 0.975 },
       {
-        y: -80, rotate: 2,
+        yPercent: -8, rotate: 2, rotateY: 3, scale: 1.01, ease: 'none',
         scrollTrigger: { trigger: '#showcase-section', start: 'top bottom', end: 'bottom top', scrub: 2 },
       }
     );
@@ -443,32 +506,36 @@ export const LandingScreen: React.FC = () => {
           <div className="flex flex-col md:block items-center gap-20 md:gap-0 md:min-h-[1200px] py-10 md:py-0">
 
             {/* 1. 作曲家主页 (Center-ish focus) */}
-            <div id="showcase-img-2" className="relative md:absolute z-20 w-[85%] md:w-[32%] md:top-[8%] md:left-1/2 md:-translate-x-1/2 rounded-[2.2rem] overflow-hidden shadow-[0_40px_80px_-15px_rgba(0,0,0,0.8)] hover:z-30 transition-all duration-500 ring-1 ring-white/10">
-              <img
-                src={appHome}
-                alt="App Home"
-                className="w-full h-auto scale-[1.02] origin-center"
-              />
-              <div className="absolute inset-0 rounded-[2.2rem] ring-1 ring-inset ring-white/20 pointer-events-none" />
-            </div>
+            <ShowcasePhone
+              id="showcase-img-2"
+              image={appHome}
+              alt="App Home"
+              outerClassName="z-20 w-[85%] md:absolute md:w-[32%] md:top-[8%] md:left-1/2 md:-translate-x-1/2 hover:z-30 transition-transform duration-500"
+              frameRadius="2.5rem"
+              screenRadius="2.2rem"
+            />
 
             {/* 2. 个人主页 (Left) */}
-            <div id="showcase-img-1" className="relative md:absolute z-10 w-[85%] md:w-[28%] md:left-[8%] md:top-[18%] rounded-[1.8rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] ring-1 ring-white/5">
-              <img
-                src={composerProfile}
-                alt="Composer Profile"
-                className="w-full h-auto scale-[1.02] origin-center opacity-90 md:opacity-80"
-              />
-            </div>
+            <ShowcasePhone
+              id="showcase-img-1"
+              image={composerProfile}
+              alt="Composer Profile"
+              outerClassName="z-10 w-[85%] md:absolute md:w-[28%] md:left-[8%] md:top-[18%]"
+              frameRadius="2.1rem"
+              screenRadius="1.8rem"
+              imageClassName="opacity-95 md:opacity-90"
+            />
 
             {/* 3. AI 助手 (Right) */}
-            <div id="showcase-img-3" className="relative md:absolute z-10 w-[85%] md:w-[28%] md:right-[8%] md:top-[24%] rounded-[1.8rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.7)] ring-1 ring-white/5">
-              <img
-                src={aiAssistant}
-                alt="AI Assistant"
-                className="w-full h-auto scale-[1.02] origin-center opacity-90 md:opacity-80"
-              />
-            </div>
+            <ShowcasePhone
+              id="showcase-img-3"
+              image={aiAssistant}
+              alt="AI Assistant"
+              outerClassName="z-10 w-[85%] md:absolute md:w-[28%] md:right-[8%] md:top-[24%]"
+              frameRadius="2.1rem"
+              screenRadius="1.8rem"
+              imageClassName="opacity-95 md:opacity-90"
+            />
           </div>
         </div>
       </section>
