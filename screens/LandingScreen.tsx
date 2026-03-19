@@ -511,8 +511,8 @@ export const LandingScreen: React.FC = () => {
               image={appHome}
               alt="App Home"
               outerClassName="z-20 w-[85%] md:absolute md:w-[32%] md:top-[8%] md:left-1/2 md:-translate-x-1/2 hover:z-30 transition-transform duration-500"
-              frameRadius="2.5rem"
-              screenRadius="2.2rem"
+              frameRadius="2.1rem"
+              screenRadius="1.8rem"
             />
 
             {/* 2. 个人主页 (Left) */}
