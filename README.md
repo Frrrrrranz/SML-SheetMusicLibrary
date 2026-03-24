@@ -54,6 +54,3 @@ npm run dev
 
 本项目基于 [GPL-3.0](LICENSE) 开源。
 
-## Workflow
-
-See [WORKFLOW.md](./WORKFLOW.md) for Git commit/push conventions.
