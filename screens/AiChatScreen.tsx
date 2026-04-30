@@ -76,9 +76,10 @@ interface ChatMessage {
 }
 
 // 消息气泡动画
+// NOTE: 使用 as const 确保 ease 被推断为字面量类型而非 string
 const bubbleVariants = {
     initial: { opacity: 0, y: 12 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
     exit: { opacity: 0, transition: { duration: 0.15 } },
 };
 

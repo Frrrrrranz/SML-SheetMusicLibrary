@@ -2,7 +2,7 @@
  * 动画配置工具
  * 使用 Framer Motion 的通用动画变体定义
  */
-import { Variants, Transition } from 'framer-motion';
+import type { Variants, Transition, Easing } from 'framer-motion';
 
 // =============================================
 // 通用过渡配置
@@ -18,14 +18,14 @@ export const springTransition: Transition = {
 // 平滑过渡（适合淡入淡出）
 export const easeTransition: Transition = {
     type: 'tween',
-    ease: [0.25, 0.1, 0.25, 1], // 类似 ease-out
+    ease: [0.25, 0.1, 0.25, 1] satisfies Easing, // 类似 ease-out
     duration: 0.3,
 };
 
 // 快速过渡
 export const quickTransition: Transition = {
     type: 'tween',
-    ease: 'easeOut',
+    ease: 'easeOut' satisfies Easing,
     duration: 0.2,
 };
 
@@ -226,7 +226,8 @@ export const searchResultItem: Variants = {
 // =============================================
 
 // 路由切换过渡（淡入淡出）
-export const pageTransition: Variants = {
+// NOTE: 使用 const 断言让 TypeScript 推断精确的字面量类型，避免 Variants 索引签名不兼容问题
+export const pageTransition = {
     initial: {
         opacity: 0,
     },
@@ -234,20 +235,20 @@ export const pageTransition: Variants = {
         opacity: 1,
         transition: {
             duration: 0.25,
-            ease: 'easeOut',
+            ease: 'easeOut' satisfies Easing,
         },
     },
     exit: {
         opacity: 0,
         transition: {
             duration: 0.15,
-            ease: 'easeIn',
+            ease: 'easeIn' satisfies Easing,
         },
     },
-};
+} as const;
 
 // Tab 内容切换过渡（淡入 + 轻微位移）
-export const tabContent: Variants = {
+export const tabContent = {
     initial: {
         opacity: 0,
         y: 8,
@@ -257,7 +258,7 @@ export const tabContent: Variants = {
         y: 0,
         transition: {
             duration: 0.25,
-            ease: [0.25, 0.1, 0.25, 1],
+            ease: [0.25, 0.1, 0.25, 1] satisfies Easing,
         },
     },
     exit: {
@@ -265,7 +266,7 @@ export const tabContent: Variants = {
         y: -8,
         transition: {
             duration: 0.15,
-            ease: 'easeIn',
+            ease: 'easeIn' satisfies Easing,
         },
     },
-};
+} as const;

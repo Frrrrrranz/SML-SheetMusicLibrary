@@ -63,6 +63,37 @@ export const translations = {
             english: 'English',
             chinese: '中文',
         },
+        composers: {
+            title: '作曲家',
+            noComposers: '还没有作曲家',
+            addFirst: '点击右下角的 + 按钮添加第一位作曲家',
+            add: '添加作曲家',
+            creating: '创建中...',
+            sheetMusic: '{count} 份乐谱',
+            recordings: '{count} 条录音',
+            form: {
+                name: '姓名',
+                namePlaceholder: '例如：肖邦',
+                period: '时期',
+                periodPlaceholder: '例如：浪漫主义',
+            },
+        },
+        aiChat: {
+            title: 'AI 助手',
+            greeting: '你好！我是你的音乐助手，可以回答乐理、技法、音乐史等方面的问题。',
+            suggestionsLabel: '快速提问',
+            quick1: '什么是五度圈？',
+            quick2: '如何练习音阶？',
+            quick3: '肖邦的代表作有哪些？',
+            quick4: '什么是奏鸣曲式？',
+            placeholder: '输入你的音乐问题...',
+            error: '抱歉，我暂时无法回答这个问题，请稍后再试。',
+        },
+        auth: {
+            errors: {
+                genericError: '操作失败，请稍后重试。',
+            },
+        },
     },
     en: {
         landing: {
@@ -127,6 +158,37 @@ export const translations = {
             language: 'Language',
             english: 'English',
             chinese: 'Chinese',
+        },
+        composers: {
+            title: 'Composers',
+            noComposers: 'No composers yet',
+            addFirst: 'Tap the + button to add your first composer',
+            add: 'Add Composer',
+            creating: 'Creating...',
+            sheetMusic: '{count} sheet music',
+            recordings: '{count} recordings',
+            form: {
+                name: 'Name',
+                namePlaceholder: 'e.g. Chopin',
+                period: 'Period',
+                periodPlaceholder: 'e.g. Romantic',
+            },
+        },
+        aiChat: {
+            title: 'AI Assistant',
+            greeting: 'Hello! I\'m your music assistant. Ask me about music theory, techniques, history, and more.',
+            suggestionsLabel: 'Quick Questions',
+            quick1: 'What is the circle of fifths?',
+            quick2: 'How to practice scales?',
+            quick3: 'What are Chopin\'s masterpieces?',
+            quick4: 'What is sonata form?',
+            placeholder: 'Ask me anything about music...',
+            error: 'Sorry, I\'m having trouble answering right now. Please try again later.',
+        },
+        auth: {
+            errors: {
+                genericError: 'Operation failed, please try again later.',
+            },
         },
     },
 };

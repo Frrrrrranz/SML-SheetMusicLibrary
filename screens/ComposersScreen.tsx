@@ -206,7 +206,7 @@ export const ComposersScreen: React.FC<ComposersScreenProps> = ({ composers, isL
         className="fixed bottom-24 right-6 size-14 bg-oldGold text-white rounded-full shadow-xl flex items-center justify-center z-30 ring-2 ring-white/20"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.3, type: 'spring', stiffness: 400, damping: 20 }}
+        // NOTE: transition 由 fabAnimation 提供，避免重复定义
         {...fabAnimation}
       >
         <Plus size={28} />
