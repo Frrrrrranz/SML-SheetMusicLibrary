@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { Download, Github, Globe, Monitor } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -10,6 +10,7 @@ import aiAssistant from '../pic/ai-assistant.jpg';
 
 const GITHUB_RELEASE_URL = 'https://github.com/Frrrrrranz/SML-APP/releases/latest';
 const GITHUB_REPO_URL = 'https://github.com/Frrrrrranz/SML-APP';
+const GITHUB_LATEST_RELEASE_API = 'https://api.github.com/repos/Frrrrrranz/SML-APP/releases/latest';
 
 interface ShowcasePhoneProps {
   id: string;
@@ -225,6 +226,8 @@ const CustomCursor: React.FC = () => {
 export const LandingScreen: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
   const landing = t.landing;
+  const [androidDownloadUrl, setAndroidDownloadUrl] = useState(GITHUB_RELEASE_URL);
+  const [windowsDownloadUrl, setWindowsDownloadUrl] = useState(GITHUB_RELEASE_URL);
 
   // GSAP 初始化 — 所有滚动驱动动画在组件挂载后触发
   const initGSAP = useCallback(() => {
@@ -369,6 +372,37 @@ export const LandingScreen: React.FC = () => {
     // 短暂延迟确保 DOM 就绪
     setTimeout(checkGSAP, 300);
   }, [initGSAP]);
+
+  useEffect(() => {
+    const resolveLatestAssetLinks = async () => {
+      try {
+        const response = await fetch(GITHUB_LATEST_RELEASE_API);
+        if (!response.ok) return;
+
+        const latestRelease = await response.json();
+        const assets: Array<{ name?: string; browser_download_url?: string }> = Array.isArray(latestRelease?.assets)
+          ? latestRelease.assets
+          : [];
+
+        const androidAsset = assets.find((asset) => asset.name?.toLowerCase().endsWith('.apk'));
+        const windowsAsset = assets.find((asset) => {
+          const fileName = asset.name?.toLowerCase() ?? '';
+          return fileName.endsWith('.exe') && fileName.includes('setup');
+        }) ?? assets.find((asset) => asset.name?.toLowerCase().endsWith('.exe'));
+
+        if (androidAsset?.browser_download_url) {
+          setAndroidDownloadUrl(androidAsset.browser_download_url);
+        }
+        if (windowsAsset?.browser_download_url) {
+          setWindowsDownloadUrl(windowsAsset.browser_download_url);
+        }
+      } catch {
+        // Fallback keeps original release page link.
+      }
+    };
+
+    resolveLatestAssetLinks();
+  }, []);
 
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');
@@ -674,18 +708,16 @@ export const LandingScreen: React.FC = () => {
           {/* 按钮组 — Android / Windows / GitHub */}
           <div id="cta-buttons" className="flex flex-col sm:flex-row gap-4 mt-4 opacity-0 translate-y-5">
             <a
-              href={GITHUB_RELEASE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={androidDownloadUrl}
+              download
               className="flex items-center justify-center gap-2.5 px-8 py-4 bg-oldGold text-bgDeep font-bold text-base rounded-sm hover:bg-goldLight transition-colors shadow-lg shadow-oldGold/20"
             >
               <Download size={18} />
               {landing.downloadAndroidBtn}
             </a>
             <a
-              href={GITHUB_RELEASE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={windowsDownloadUrl}
+              download
               className="flex items-center justify-center gap-2.5 px-8 py-4 bg-oldGold text-bgDeep font-bold text-base rounded-sm hover:bg-goldLight transition-colors shadow-lg shadow-oldGold/20"
             >
               <Monitor size={18} />
