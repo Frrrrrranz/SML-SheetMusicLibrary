@@ -2,9 +2,8 @@ name: Supabase Keep-Alive
 
 on:
   schedule:
-    # 每三天触发一次 (UTC时间 00:00)
     - cron: '0 0 */3 * *'
-  workflow_dispatch: # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   ping-supabase:
@@ -12,7 +11,19 @@ jobs:
     steps:
       - name: Ping Supabase REST API
         run: |
-          curl -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/composers?select=id&limit=1" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -I | grep "HTTP/"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/composers?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+
+          echo "HTTP Status: $HTTP_STATUS"
+
+          if [ "$HTTP_STATUS" = "000" ]; then
+            echo "❌ 无法连接到 Supabase，请检查 SUPABASE_URL secret"
+            exit 1
+          elif [ "${HTTP_STATUS:0:1}" = "5" ]; then
+            echo "❌ Supabase 服务端错误: $HTTP_STATUS"
+            exit 1
+          else
+            echo "✅ Supabase 响应正常 (HTTP $HTTP_STATUS)"
+          fi
