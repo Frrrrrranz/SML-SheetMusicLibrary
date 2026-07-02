@@ -2,28 +2,105 @@ name: Supabase Keep-Alive
 
 on:
   schedule:
+    # 每三天触发一次 (UTC时间 00:00)
     - cron: '0 0 */3 * *'
-  workflow_dispatch:
+  workflow_dispatch: # 允许手动触发
 
 jobs:
   ping-supabase:
     runs-on: ubuntu-latest
     steps:
+      - name: Validate Secrets
+        run: |
+          # NOTE: 在连接前先校验 Secret 是否已配置，避免 curl exit code 6（无法解析主机名）
+          if [ -z "${{ secrets.SUPABASE_URL }}" ]; then
+            echo "❌ SUPABASE_URL secret 未配置，请前往 Settings → Secrets and variables → Actions 添加"
+            exit 1
+          fi
+          if [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
+            echo "❌ SUPABASE_ANON_KEY secret 未配置，请前往 Settings → Secrets and variables → Actions 添加"
+            exit 1
+          fi
+          echo "✅ Secrets 校验通过，目标地址: ${{ secrets.SUPABASE_URL }}"
+
       - name: Ping Supabase REST API
         run: |
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+          # NOTE: curl exit code 6 = Could not resolve host，通常意味着 Supabase 项目已暂停（域名不可达）
+          # --max-time 30 防止网络挂起时无限等待；|| echo CURL_FAILED 阻止 bash set -e 提前退出
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
             -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/composers?select=id&limit=1" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            || echo "CURL_FAILED")
 
           echo "HTTP Status: $HTTP_STATUS"
 
+          # NOTE: curl 网络层失败（如 exit 6 DNS 失败）时 echo 输出 CURL_FAILED 占位符
+          if [ "$HTTP_STATUS" = "CURL_FAILED" ]; then
+            echo "❌ curl 网络错误，Supabase 项目可能已暂停（域名无法解析）"
+            echo "   请前往 https://supabase.com/dashboard 手动重启项目，然后 Re-run 此 Action"
+            exit 1
+          fi
+
+          # NOTE: 200 表示成功，406 表示需要 Accept header（表存在即视为已激活）
+          # 只有在无法连接（000）或服务器错误（5xx）时才视为失败
           if [ "$HTTP_STATUS" = "000" ]; then
-            echo "❌ 无法连接到 Supabase，请检查 SUPABASE_URL secret"
+            echo "❌ 无法连接到 Supabase（HTTP 000），项目可能已暂停"
             exit 1
           elif [ "${HTTP_STATUS:0:1}" = "5" ]; then
-            echo "❌ Supabase 服务端错误: $HTTP_STATUS"
+            echo "❌ Supabase 服务端错误: $HTTP_STATUS，项目可能仍在启动中"
             exit 1
           else
-            echo "✅ Supabase 响应正常 (HTTP $HTTP_STATUS)"
+            echo "✅ Supabase 响应正常 (HTTP $HTTP_STATUS)，数据库保持活跃"
           fi
+
+  # NOTE: 仅在 ping-supabase 失败时运行，通过创建 GitHub Issue 实现告警
+  # GitHub 会自动向仓库订阅者（包括 Owner）发送邮件通知新 Issue
+  notify-on-failure:
+    needs: ping-supabase
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Create failure alert issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const today = new Date().toISOString().split('T')[0];
+            const title = `🚨 [Keep-Alive] Supabase 项目可能已暂停 - ${today}`;
+
+            // NOTE: 避免同一天重复创建 Issue，先检查今日是否已有相同标题的 open Issue
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'supabase-alert'
+            });
+
+            const alreadyExists = existingIssues.data.some(issue => issue.title === title);
+            if (alreadyExists) {
+              console.log('今日告警 Issue 已存在，跳过创建');
+              return;
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: [
+                '## ⚠️ Supabase Keep-Alive 失败',
+                '',
+                `- **失败时间**: ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`,
+                `- **失败 Run**: [查看详情](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+                '',
+                '## 处理步骤',
+                '1. 前往 [Supabase Dashboard](https://supabase.com/dashboard) 检查项目状态',
+                '2. 如项目已暂停，点击 **Restore project** 手动恢复',
+                '3. 恢复后在 Actions 页面点击 **Re-run jobs** 验证',
+                '4. 确认正常后关闭此 Issue',
+                '',
+                '> 此 Issue 由 GitHub Actions 自动创建'
+              ].join('\n'),
+              labels: ['supabase-alert']
+            });
