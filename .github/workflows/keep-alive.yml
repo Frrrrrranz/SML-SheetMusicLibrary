@@ -2,62 +2,122 @@ name: Supabase Keep-Alive
 
 on:
   schedule:
-    # 每三天触发一次 (UTC时间 00:00)
-    - cron: '0 0 */3 * *'
+    # 每天执行 2 次 (UTC时间 00:17 与 12:17，对应北京时间 08:17 与 20:17)
+    # 避开整点调度高峰，大幅提高容错率，确保在 Supabase 7 天静止期内持续处于活跃状态
+    - cron: '17 0,12 * * *'
   workflow_dispatch: # 允许手动触发
 
+# 赋予 contents: write（用于自动心跳提交）和 issues: write（用于失败告警）
+permissions:
+  contents: write
+  issues: write
+
 jobs:
-  ping-supabase:
+  ping-and-keepalive:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+
       - name: Validate Secrets
         run: |
-          # NOTE: 在连接前先校验 Secret 是否已配置，避免 curl exit code 6（无法解析主机名）
-          if [ -z "${{ secrets.SUPABASE_URL }}" ]; then
+          # 校验 Secret 是否已在 GitHub Settings 中配置
+          if [ -z "$SUPABASE_URL" ]; then
             echo "❌ SUPABASE_URL secret 未配置，请前往 Settings → Secrets and variables → Actions 添加"
             exit 1
           fi
-          if [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
+          if [ -z "$SUPABASE_ANON_KEY" ]; then
             echo "❌ SUPABASE_ANON_KEY secret 未配置，请前往 Settings → Secrets and variables → Actions 添加"
             exit 1
           fi
-          echo "✅ Secrets 校验通过，目标地址: ${{ secrets.SUPABASE_URL }}"
+          if [[ ! "$SUPABASE_URL" =~ ^https://[a-z0-9-]+\.supabase\.co/?$ ]]; then
+            echo "❌ SUPABASE_URL 格式无效，应为 https://<project-ref>.supabase.co"
+            exit 1
+          fi
+          echo "✅ Secrets 格式校验通过"
 
       - name: Ping Supabase REST API
+        shell: bash
         run: |
-          # NOTE: curl exit code 6 = Could not resolve host，通常意味着 Supabase 项目已暂停（域名不可达）
-          # --max-time 30 防止网络挂起时无限等待；|| echo CURL_FAILED 阻止 bash set -e 提前退出
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
-            -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/composers?select=id&limit=1" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            || echo "CURL_FAILED")
+          # 携带动态时间戳参数并强制 no-cache，穿透 Cloudflare/PostgREST 边缘缓存，确保查询直达 PostgreSQL
+          TIMESTAMP=$(date +%s)
+          TARGET_URL="${SUPABASE_URL%/}/rest/v1/composers?select=id&limit=1&_t=${TIMESTAMP}"
+          echo "正在探测 Supabase 目标地址: $TARGET_URL"
 
-          echo "HTTP Status: $HTTP_STATUS"
+          # 单独捕获 curl 退出码和响应，杜绝旧版字符串拼接导致的“假成功”
+          set +e
+          HTTP_STATUS=$(curl --silent --show-error --output response.json --write-out "%{http_code}" \
+            --connect-timeout 10 --max-time 30 \
+            --request GET "$TARGET_URL" \
+            --header "apikey: $SUPABASE_ANON_KEY" \
+            --header "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            --header "Accept: application/json" \
+            --header "Cache-Control: no-cache" \
+            --header "Pragma: no-cache")
+          CURL_EXIT=$?
+          set -e
 
-          # NOTE: curl 网络层失败（如 exit 6 DNS 失败）时 echo 输出 CURL_FAILED 占位符
-          if [ "$HTTP_STATUS" = "CURL_FAILED" ]; then
-            echo "❌ curl 网络错误，Supabase 项目可能已暂停（域名无法解析）"
-            echo "   请前往 https://supabase.com/dashboard 手动重启项目，然后 Re-run 此 Action"
+          echo "curl exit code: $CURL_EXIT"
+          echo "HTTP status code: $HTTP_STATUS"
+
+          # 网络层或 DNS 解析失败
+          if [ "$CURL_EXIT" -ne 0 ]; then
+            echo "❌ 网络层连接错误，无法连接到 Supabase（curl exit code: $CURL_EXIT）"
+            echo "   可能原因：DNS 解析失败、连接超时或域名未就绪"
             exit 1
           fi
 
-          # NOTE: 200 表示成功，406 表示需要 Accept header（表存在即视为已激活）
-          # 只有在无法连接（000）或服务器错误（5xx）时才视为失败
-          if [ "$HTTP_STATUS" = "000" ]; then
-            echo "❌ 无法连接到 Supabase（HTTP 000），项目可能已暂停"
+          # 针对 Supabase 免费版已暂停的专属状态码 540
+          if [ "$HTTP_STATUS" = "540" ]; then
+            echo "🚨 Supabase 项目已被暂停 (HTTP 540 Paused)"
+            echo "   请立即前往 https://supabase.com/dashboard 手动点击 'Restore project' 恢复"
             exit 1
-          elif [ "${HTTP_STATUS:0:1}" = "5" ]; then
-            echo "❌ Supabase 服务端错误: $HTTP_STATUS，项目可能仍在启动中"
+          fi
+
+          # 状态码必须在 200~299 范围内才算真正成功
+          if [[ ! "$HTTP_STATUS" =~ ^2[0-9]{2}$ ]]; then
+            echo "❌ Supabase 查询失败（HTTP 状态码: $HTTP_STATUS）"
+            echo "响应内容摘要:"
+            head -c 1000 response.json || true
+            echo ""
             exit 1
+          fi
+
+          echo "✅ Supabase 数据库响应正常（HTTP $HTTP_STATUS），数据库保持活跃！"
+
+      - name: Keep GitHub Actions Active (Heartbeat)
+        shell: bash
+        run: |
+          # NOTE: GitHub Actions 若超过 60 天无代码提交会自动禁用所有定时工作流（Disabled 状态）
+          # 本步骤计算距离上一次提交的天数，若超过 25 天，则自动提交一次心跳记录，确保工作流永不失效
+          LAST_COMMIT_TIME=$(git log -1 --format=%ct)
+          CURRENT_TIME=$(date +%s)
+          DIFF_DAYS=$(( (CURRENT_TIME - LAST_COMMIT_TIME) / 86400 ))
+          echo "距离上一次代码提交已过去: $DIFF_DAYS 天"
+
+          if [ "$DIFF_DAYS" -ge 25 ]; then
+            echo "⚠️ 距离上次提交超过 25 天，执行自动心跳提交以防止 GitHub 自动停用 Action..."
+            mkdir -p .github
+            echo "Keep-alive heartbeat: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" > .github/keepalive-heartbeat.txt
+            git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git add .github/keepalive-heartbeat.txt
+            git commit -m "chore(ci): refresh repository activity to keep workflows active"
+            git push origin main
+            echo "✅ 已成功提交心跳文件，GitHub 60天定时任务禁用倒计时已刷新！"
           else
-            echo "✅ Supabase 响应正常 (HTTP $HTTP_STATUS)，数据库保持活跃"
+            echo "✅ 仓库活跃度在安全期内（$DIFF_DAYS < 25 天），无需提交心跳"
           fi
 
-  # NOTE: 仅在 ping-supabase 失败时运行，通过创建 GitHub Issue 实现告警
-  # GitHub 会自动向仓库订阅者（包括 Owner）发送邮件通知新 Issue
+  # 失败告警：通过创建 GitHub Issue 实现，GitHub 会自动向仓库 Owner 发送通知邮件
   notify-on-failure:
-    needs: ping-supabase
+    needs: ping-and-keepalive
     if: failure()
     runs-on: ubuntu-latest
     permissions:
@@ -68,9 +128,9 @@ jobs:
         with:
           script: |
             const today = new Date().toISOString().split('T')[0];
-            const title = `🚨 [Keep-Alive] Supabase 项目可能已暂停 - ${today}`;
+            const title = `🚨 [Keep-Alive] Supabase 项目可能已暂停或连接失败 - ${today}`;
 
-            // NOTE: 避免同一天重复创建 Issue，先检查今日是否已有相同标题的 open Issue
+            // 避免同一天重复创建相同标题的 open Issue
             const existingIssues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -89,18 +149,18 @@ jobs:
               repo: context.repo.repo,
               title: title,
               body: [
-                '## ⚠️ Supabase Keep-Alive 失败',
+                '## ⚠️ Supabase Keep-Alive 探测失败告警',
                 '',
                 `- **失败时间**: ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`,
-                `- **失败 Run**: [查看详情](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+                `- **运行记录**: [查看详情](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
                 '',
-                '## 处理步骤',
-                '1. 前往 [Supabase Dashboard](https://supabase.com/dashboard) 检查项目状态',
-                '2. 如项目已暂停，点击 **Restore project** 手动恢复',
-                '3. 恢复后在 Actions 页面点击 **Re-run jobs** 验证',
+                '## 排查与恢复步骤',
+                '1. 前往 [Supabase Dashboard](https://supabase.com/dashboard) 检查对应项目状态',
+                '2. 若项目已被暂停，点击 **Restore project** 进行恢复',
+                '3. 恢复后在 GitHub Actions 页面点击 **Re-run all jobs** 验证',
                 '4. 确认正常后关闭此 Issue',
                 '',
-                '> 此 Issue 由 GitHub Actions 自动创建'
+                '> 此 Issue 由 GitHub Actions Keep-Alive 自动创建'
               ].join('\n'),
               labels: ['supabase-alert']
             });
