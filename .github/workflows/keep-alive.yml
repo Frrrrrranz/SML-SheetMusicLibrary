@@ -45,9 +45,8 @@ jobs:
       - name: Ping Supabase REST API
         shell: bash
         run: |
-          # 携带动态时间戳参数并强制 no-cache，穿透 Cloudflare/PostgREST 边缘缓存，确保查询直达 PostgreSQL
-          TIMESTAMP=$(date +%s)
-          TARGET_URL="${SUPABASE_URL%/}/rest/v1/composers?select=id&limit=1&_t=${TIMESTAMP}"
+          # PostgREST 会把未知查询参数当作过滤条件解析，因此不要添加时间戳参数
+          TARGET_URL="${SUPABASE_URL%/}/rest/v1/composers?select=id&limit=1"
           echo "正在探测 Supabase 目标地址: $TARGET_URL"
 
           # 单独捕获 curl 退出码和响应，杜绝旧版字符串拼接导致的“假成功”
